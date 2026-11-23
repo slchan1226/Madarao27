@@ -17,6 +17,11 @@ import {
   Snowflake,
   Thermometer,
 } from 'lucide-react';
+import {
+  BannerBackdrop,
+  BANNER_THEME_LABELS,
+  getBannerGradientClass,
+} from './components/BannerBackdrop';
 import {CountdownWidget} from './components/CountdownWidget';
 import {FlightTab} from './components/FlightTab';
 import {GuideModal} from './components/GuideModal';
@@ -31,6 +36,11 @@ import {WeatherTab} from './components/WeatherTab';
 import {useOnlineStatus} from './hooks/useOnlineStatus';
 import {usePWAInstall} from './hooks/usePWAInstall';
 import {useSkiWeather} from './hooks/useSkiWeather';
+import {
+  isJapanDaytimeNow,
+  type BannerWeatherTheme,
+  type DayPeriod,
+} from './lib/weather';
 import type {CarId, MapMode, ResortKey, TabId} from './types/trip';
 
 const STORAGE_KEYS = {
@@ -94,6 +104,10 @@ export default function App() {
   const [lightboxResort, setLightboxResort] = useState<ResortKey | null>(null);
   const [installModalOpen, setInstallModalOpen] = useState(false);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [previewTheme, setPreviewTheme] = useState<BannerWeatherTheme | null>(
+    null,
+  );
+  const [previewPeriod, setPreviewPeriod] = useState<DayPeriod | null>(null);
 
   const [toastMessage, setToastMessage] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
@@ -116,6 +130,19 @@ export default function App() {
 
   const skiWeather = useSkiWeather(showToast);
   const madaraoWeather = skiWeather.derivedByResort.madarao ?? null;
+
+  const activeBannerTheme: BannerWeatherTheme =
+    previewTheme ?? madaraoWeather?.bannerTheme ?? 'snow';
+  const activeIsDay: boolean =
+    previewPeriod !== null
+      ? previewPeriod === 'day'
+      : madaraoWeather
+        ? madaraoWeather.isDay
+        : isJapanDaytimeNow();
+  const bannerGradientClass = getBannerGradientClass(
+    activeBannerTheme,
+    activeIsDay,
+  );
 
   useEffect(() => {
     return () => {
@@ -292,88 +319,11 @@ export default function App() {
   return (
     <div className="app-shell">
       <div ref={scrollContainerRef} className="app-scroll-area">
-        {/* 頂部日系雪山主題橫幅 */}
-        <header className="relative overflow-hidden bg-gradient-to-br from-snow-900 via-[#153e75] to-sky-700 text-white shadow-lg safe-top-header">
-        <div
-          aria-hidden="true"
-          className="inset-0 absolute overflow-hidden pointer-events-none"
+        {/* 頂部日系雪山主題橫幅（依斑尾高原即時天氣與日夜自動切換主題） */}
+        <header
+          className={`relative overflow-hidden bg-gradient-to-br ${bannerGradientClass} text-white shadow-lg safe-top-header transition-colors duration-700`}
         >
-          <span
-            className="snowflake"
-            style={{left: '8%', animationDuration: '7s', animationDelay: '0s'}}
-          >
-            ❄
-          </span>
-          <span
-            className="snowflake"
-            style={{
-              left: '22%',
-              animationDuration: '9s',
-              animationDelay: '2s',
-              fontSize: '8px',
-            }}
-          >
-            •
-          </span>
-          <span
-            className="snowflake"
-            style={{left: '38%', animationDuration: '6.5s', animationDelay: '1s'}}
-          >
-            ❄
-          </span>
-          <span
-            className="snowflake"
-            style={{
-              left: '55%',
-              animationDuration: '8.5s',
-              animationDelay: '3s',
-              fontSize: '9px',
-            }}
-          >
-            •
-          </span>
-          <span
-            className="snowflake"
-            style={{
-              left: '72%',
-              animationDuration: '7.5s',
-              animationDelay: '0.5s',
-            }}
-          >
-            ❄
-          </span>
-          <span
-            className="snowflake"
-            style={{
-              left: '89%',
-              animationDuration: '9.5s',
-              animationDelay: '1.5s',
-              fontSize: '8px',
-            }}
-          >
-            •
-          </span>
-        </div>
-
-        <svg
-          className="absolute bottom-0 left-0 w-full h-14 pointer-events-none"
-          viewBox="0 0 1440 220"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path
-            fill="rgba(186, 230, 253, 0.16)"
-            d="M0,160 L180,75 L340,145 L560,45 L790,155 L1020,55 L1240,135 L1440,65 L1440,220 L0,220 Z"
-          />
-          <path
-            fill="rgba(224, 242, 254, 0.25)"
-            d="M0,185 L240,105 L460,175 L690,85 L940,165 L1180,95 L1440,160 L1440,220 L0,220 Z"
-          />
-          <path
-            fill="#eff6ff"
-            d="M0,200 L140,168 L290,192 L490,152 L680,196 L910,158 L1130,190 L1320,162 L1440,185 L1440,220 L0,220 Z"
-          />
-        </svg>
+          <BannerBackdrop theme={activeBannerTheme} isDay={activeIsDay} />
 
         <div className="relative w-full max-w-xl mx-auto px-3.5 sm:px-5 pb-7">
           <div className="flex items-center justify-between gap-1.5 mb-2.5">
@@ -467,6 +417,16 @@ export default function App() {
                       : '-- cm'}
                   </span>
                 </span>
+                {(previewTheme !== null || previewPeriod !== null) && (
+                  <>
+                    <span className="text-white/40" aria-hidden="true">
+                      ｜
+                    </span>
+                    <span className="text-amber-200">
+                      預覽：{BANNER_THEME_LABELS[activeBannerTheme]}
+                    </span>
+                  </>
+                )}
                 <ChevronRight
                   className="w-3.5 h-3.5 text-sky-200 shrink-0"
                   aria-hidden="true"
@@ -531,6 +491,28 @@ export default function App() {
               isRefreshing={skiWeather.isRefreshing}
               errorMessage={skiWeather.errorMessage}
               onRefresh={() => void skiWeather.refreshAll(true)}
+              activeBannerTheme={activeBannerTheme}
+              activeIsDay={activeIsDay}
+              previewTheme={previewTheme}
+              previewPeriod={previewPeriod}
+              onSelectPreviewTheme={(theme) => {
+                setPreviewTheme(theme);
+                if (theme) {
+                  scrollContainerRef.current?.scrollTo({
+                    top: 0,
+                    behavior: 'smooth',
+                  });
+                }
+              }}
+              onSelectPreviewPeriod={(period) => {
+                setPreviewPeriod(period);
+                if (period) {
+                  scrollContainerRef.current?.scrollTo({
+                    top: 0,
+                    behavior: 'smooth',
+                  });
+                }
+              }}
             />
           )}
           {activeTab === 'local' && <LocalTab />}

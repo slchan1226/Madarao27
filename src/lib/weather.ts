@@ -56,6 +56,15 @@ export interface HourlyForecastItem {
   precipProb: number | null;
 }
 
+export type BannerWeatherTheme =
+  | 'sunny'
+  | 'cloudy'
+  | 'snow'
+  | 'heavy-snow'
+  | 'rain';
+
+export type DayPeriod = 'day' | 'night';
+
 export interface DerivedResortWeather {
   snowDepthCm: number | null;
   snowDepthSource: string;
@@ -68,6 +77,8 @@ export interface DerivedResortWeather {
   currentTemp: number;
   feelsLike: number;
   windSpeed: number;
+  isDay: boolean;
+  bannerTheme: BannerWeatherTheme;
   currentWeather: {
     label: string;
     icon: WeatherIconKind;
@@ -97,7 +108,7 @@ function buildOpenMeteoUrl(
     `?latitude=${latitude}` +
     `&longitude=${longitude}` +
     `&elevation=${elevation}` +
-    '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,snowfall,snow_depth' +
+    '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,snowfall,snow_depth,is_day' +
     '&hourly=temperature_2m,snowfall,snow_depth,weather_code,wind_speed_10m,precipitation_probability' +
     '&models=best_match,ecmwf_ifs025,gfs_seamless,icon_global' +
     '&timezone=Asia%2FTokyo' +
@@ -210,6 +221,22 @@ export function describeWeatherCode(code: number): {
   if (code >= 80 && code <= 82) return {label: '驟雨', icon: 'rain'};
   if (code >= 95) return {label: '雷暴陣雪', icon: 'storm'};
   return {label: '山區多雲', icon: 'cloud'};
+}
+
+export function resolveBannerWeatherTheme(code: number): BannerWeatherTheme {
+  if (code === 0 || code === 1 || code === 2) return 'sunny';
+  if (code === 3 || code === 45 || code === 48) return 'cloudy';
+  if (code === 71 || code === 73 || code === 85) return 'snow';
+  if (code === 75 || code === 77 || code === 86 || code >= 95) {
+    return 'heavy-snow';
+  }
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  return 'cloudy';
+}
+
+export function isJapanDaytimeNow(): boolean {
+  const jstHour = new Date(Date.now() + 9 * 3600_000).getUTCHours();
+  return jstHour >= 6 && jstHour < 17;
 }
 
 const PRIMARY_MODEL_ORDER = [
@@ -463,13 +490,16 @@ export function deriveResortWeather(
   const feelsLikeRaw = readNumericCurrent(current, 'apparent_temperature');
   const windRaw = readNumericCurrent(current, 'wind_speed_10m');
   const codeRaw = readNumericCurrent(current, 'weather_code');
+  const isDayRaw = readNumericCurrent(current, 'is_day');
 
+  const resolvedCode = codeRaw ?? next24h[0]?.weatherCode ?? 3;
   const currentTemp = Math.round(currentTempRaw ?? next24h[0]?.tempC ?? 0);
   const feelsLike = Math.round(feelsLikeRaw ?? currentTemp);
   const windSpeed = Math.round(windRaw ?? next24h[0]?.windKmh ?? 0);
-  const currentWeather = describeWeatherCode(
-    codeRaw ?? next24h[0]?.weatherCode ?? 3,
-  );
+  const isDay =
+    isDayRaw !== null ? isDayRaw === 1 : isJapanDaytimeNow();
+  const currentWeather = describeWeatherCode(resolvedCode);
+  const bannerTheme = resolveBannerWeatherTheme(resolvedCode);
 
   return {
     snowDepthCm: bestDepthCm,
@@ -483,6 +513,8 @@ export function deriveResortWeather(
     currentTemp,
     feelsLike,
     windSpeed,
+    isDay,
+    bannerTheme,
     currentWeather,
     next24h,
     blocks,
