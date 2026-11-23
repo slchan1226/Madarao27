@@ -234,9 +234,24 @@ export function resolveBannerWeatherTheme(code: number): BannerWeatherTheme {
   return 'cloudy';
 }
 
+export function getJapanClockNow(): {hours: number; minutes: number} {
+  const jst = new Date(Date.now() + 9 * 3600_000);
+  return {
+    hours: jst.getUTCHours(),
+    minutes: jst.getUTCMinutes(),
+  };
+}
+
+export function formatJapanTimeNow(): string {
+  const {hours, minutes} = getJapanClockNow();
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+// 斑尾高原 2 月雪季日出約 06:25、日落加暮光約 17:55 JST，
+// 統一以即時日本時間 06:00–18:00 判定日間（同時避免離線快取殘留舊 is_day 或 11 月 16:33 過早轉夜）
 export function isJapanDaytimeNow(): boolean {
-  const jstHour = new Date(Date.now() + 9 * 3600_000).getUTCHours();
-  return jstHour >= 6 && jstHour < 17;
+  const {hours} = getJapanClockNow();
+  return hours >= 6 && hours < 18;
 }
 
 const PRIMARY_MODEL_ORDER = [
@@ -490,14 +505,12 @@ export function deriveResortWeather(
   const feelsLikeRaw = readNumericCurrent(current, 'apparent_temperature');
   const windRaw = readNumericCurrent(current, 'wind_speed_10m');
   const codeRaw = readNumericCurrent(current, 'weather_code');
-  const isDayRaw = readNumericCurrent(current, 'is_day');
 
   const resolvedCode = codeRaw ?? next24h[0]?.weatherCode ?? 3;
   const currentTemp = Math.round(currentTempRaw ?? next24h[0]?.tempC ?? 0);
   const feelsLike = Math.round(feelsLikeRaw ?? currentTemp);
   const windSpeed = Math.round(windRaw ?? next24h[0]?.windKmh ?? 0);
-  const isDay =
-    isDayRaw !== null ? isDayRaw === 1 : isJapanDaytimeNow();
+  const isDay = isJapanDaytimeNow();
   const currentWeather = describeWeatherCode(resolvedCode);
   const bannerTheme = resolveBannerWeatherTheme(resolvedCode);
 

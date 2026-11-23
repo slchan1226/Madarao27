@@ -130,15 +130,21 @@ export default function App() {
 
   const skiWeather = useSkiWeather(showToast);
   const madaraoWeather = skiWeather.derivedByResort.madarao ?? null;
+  const [japanIsDay, setJapanIsDay] = useState<boolean>(() =>
+    isJapanDaytimeNow(),
+  );
+
+  useEffect(() => {
+    const syncDayPeriod = () => setJapanIsDay(isJapanDaytimeNow());
+    syncDayPeriod();
+    const timer = window.setInterval(syncDayPeriod, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const activeBannerTheme: BannerWeatherTheme =
     previewTheme ?? madaraoWeather?.bannerTheme ?? 'snow';
   const activeIsDay: boolean =
-    previewPeriod !== null
-      ? previewPeriod === 'day'
-      : madaraoWeather
-        ? madaraoWeather.isDay
-        : isJapanDaytimeNow();
+    previewPeriod !== null ? previewPeriod === 'day' : japanIsDay;
   const bannerGradientClass = getBannerGradientClass(
     activeBannerTheme,
     activeIsDay,

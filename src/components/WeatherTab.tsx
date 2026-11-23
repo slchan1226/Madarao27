@@ -24,6 +24,7 @@ import {BANNER_THEME_LABELS} from './BannerBackdrop';
 import {
   WEATHER_RESORTS,
   describeWeatherCode,
+  formatJapanTimeNow,
   formatUpdatedTime,
   type BannerWeatherTheme,
   type DayPeriod,
@@ -689,7 +690,9 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
         </div>
 
         <p className="text-[11px] text-slate-600 leading-relaxed">
-          平時會按斑尾高原即時天氣與日本日夜自動切換橫幅效果；撳下面掣可即時試睇 5 種天氣同日夜氛圍：
+          平時按斑尾高原即時天氣與日本時間自動切換（斑尾現時{' '}
+          <strong className="text-slate-800">JST {formatJapanTimeNow()}</strong>
+          ，06:00–18:00 為日間）；撳下面掣可即時試睇 5 種天氣同日夜氛圍：
         </p>
 
         <div
