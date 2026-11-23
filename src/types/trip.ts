@@ -1,4 +1,18 @@
-export type TabId = 'flight' | 'route' | 'hotel' | 'skimap' | 'weather' | 'local';
+export type TabId =
+  | 'home'
+  | 'flight'
+  | 'route'
+  | 'hotel'
+  | 'skimap'
+  | 'weather'
+  | 'local';
+
+export type TripStagePreview =
+  | 'auto'
+  | 'pre-trip'
+  | 'in-flight'
+  | 'ski-days'
+  | 'pre-return';
 
 export type ResortKey = 'madarao' | 'romance' | 'nozawa';
 

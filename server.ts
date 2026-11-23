@@ -4,6 +4,11 @@ import fs from 'fs';
 import http from 'http';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {
+  fetchOfficialResortLifts,
+  type LiveLiftPayload,
+  type SkiResortId,
+} from './server/liveLifts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -418,6 +423,463 @@ async function startServer() {
     res.status(502).json({
       error: '暫時未能連線至 Google Maps 即時資料，已保留離線地標供查閱。',
     });
+  });
+
+  const VALID_RESORTS = new Set<SkiResortId>([
+    'madarao',
+    'tangram',
+    'romance',
+    'nozawa',
+  ]);
+  const RESORT_SEARCH_NAMES: Record<
+    SkiResortId,
+    {name: string; officialDomain: string}
+  > = {
+    madarao: {
+      name: '斑尾高原スキー場（Madarao Mountain Resort）',
+      officialDomain: 'madarao.jp',
+    },
+    tangram: {
+      name: 'タングラムスキーサーカス（Tangram Ski Circus）',
+      officialDomain: 'tangram.jp',
+    },
+    romance: {
+      name: 'スノーリゾートロマンスの神様（旧木島平スキー場 Kijimadaira）',
+      officialDomain: 'kijimadaira-ski.com',
+    },
+    nozawa: {
+      name: '野沢温泉スキー場（Nozawa Onsen Snow Resort）',
+      officialDomain: 'nozawaski.com',
+    },
+  };
+
+  const LIFT_CACHE_TTL_MS = 20 * 60 * 1000;
+  const liftMemoryCache: Partial<
+    Record<SkiResortId, {expiresAt: number; payload: LiveLiftPayload}>
+  > = {};
+
+  app.post('/api/ski/lifts', async (req: Request, res: Response) => {
+    const body = req.body as {
+      resortId?: string;
+      forceRefresh?: boolean;
+    };
+
+    const rawId = typeof body?.resortId === 'string' ? body.resortId : '';
+    if (!VALID_RESORTS.has(rawId as SkiResortId)) {
+      res.status(400).json({error: '無效的雪場代號。'});
+      return;
+    }
+    const resortId = rawId as SkiResortId;
+
+    const cached = liftMemoryCache[resortId];
+    if (!body?.forceRefresh && cached && cached.expiresAt > Date.now()) {
+      res.json(cached.payload);
+      return;
+    }
+
+    // 1. Primary: Fetch live status directly from official ski resort status pages (zero quota limit, real-time)
+    try {
+      const officialPayload = await fetchOfficialResortLifts(resortId);
+      liftMemoryCache[resortId] = {
+        expiresAt: Date.now() + LIFT_CACHE_TTL_MS,
+        payload: officialPayload,
+      };
+      res.json(officialPayload);
+      return;
+    } catch (officialErr: unknown) {
+      console.warn(
+        `[ski/lifts] Official site fetch failed for ${resortId}, falling back to Gemini Search:`,
+        officialErr instanceof Error ? officialErr.message : String(officialErr),
+      );
+    }
+
+    // 2. Fallback: Gemini 4 Hydrogen with Google Search Grounding
+    const ai = getGeminiClient();
+    if (!ai) {
+      res.status(503).json({
+        error:
+          '暫未能連線至雪場官網取得即時纜車資訊，請先查閱常規時間表或點擊官網。',
+      });
+      return;
+    }
+
+    const resortInfo = RESORT_SEARCH_NAMES[resortId];
+    const nowJst = new Date(Date.now() + 9 * 3600_000);
+    const todayJst = `${nowJst.getUTCFullYear()}-${String(
+      nowJst.getUTCMonth() + 1,
+    ).padStart(2, '0')}-${String(nowJst.getUTCDate()).padStart(2, '0')}`;
+
+    const prompt = [
+      `請使用 Google Search 查詢日本長野縣「${resortInfo.name}」（官網 ${resortInfo.officialDomain}）截至日本日期 ${todayJst} 的最新真實纜車開放狀況、營業時間、夜滑（ナイター）與官方積雪報告。`,
+      '請嚴格只根據搜尋到的真實資料回覆，不可捏造；若目前非雪季、尚未開季或已結束雪季，請明確標示為 offseason 並說明官方預計開季／結束日期及常規雪季營業時間。',
+      '請以繁體中文（香港／台灣滑雪旅客習慣用語）輸出單一 JSON 物件（不要多餘前言），欄位如下：',
+      '{',
+      '  "operationState": "open" | "partial" | "closed" | "offseason" | "unknown",',
+      '  "statusBadgeText": "精簡狀態標籤，例如：正常營業中 / 部分吊椅運行 / 受強風影響暫停 / 非雪季（預計12月中開季）",',
+      '  "openLiftsSummary": "例如：開放 8 / 11 條纜車 或 目前非雪季（共 15 條纜車）",',
+      '  "operatingHours": "今日或本季官方營業時間，例如：08:30 – 16:00（尾班 15:45）",',
+      '  "nightSkiStatus": "夜滑開放與否及時間說明",',
+      '  "officialSnowDepth": "官方最新公布積雪深度或雪況，若非雪季寫「非雪季無實測」",',
+      '  "advisory": "簡短 1-2 句營運備註（強風、新雪、開季日或雪道連通狀態）",',
+      '  "lifts": [',
+      '    { "name": "主要纜車或吊椅名", "status": "運行中 / 暫停 / 未開放 / 休止", "hours": "08:30–16:00", "note": "備註（選填）" }',
+      '  ]',
+      '}',
+    ].join('\n');
+
+    let lastErrMsg = '';
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents: prompt,
+          config: {
+            tools: [{googleSearch: {}}],
+          },
+        });
+
+        const rawText = (response.text ?? '').trim();
+
+        // Extract verified web grounding sources
+        const candidates = (
+          response as {
+            candidates?: Array<{
+              groundingMetadata?: {
+                groundingChunks?: Array<{
+                  web?: {uri?: string; title?: string};
+                }>;
+              };
+            }>;
+          }
+        )?.candidates;
+
+        const chunks =
+          candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
+        const seenUrls = new Set<string>();
+        const sources: Array<{title: string; uri: string}> = [];
+        for (const chunk of chunks) {
+          const uri = chunk?.web?.uri?.trim();
+          if (!uri || seenUrls.has(uri)) continue;
+          seenUrls.add(uri);
+          sources.push({
+            title: (chunk?.web?.title ?? uri).trim(),
+            uri,
+          });
+        }
+
+        // Safely parse JSON block if returned, otherwise preserve text as summaryMarkdown
+        let parsed: Partial<LiveLiftPayload> | null = null;
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsed = JSON.parse(jsonMatch[0]) as Partial<LiveLiftPayload>;
+          } catch {
+            parsed = null;
+          }
+        }
+
+        const validStates = new Set([
+          'open',
+          'partial',
+          'closed',
+          'offseason',
+          'unknown',
+        ]);
+        const opState =
+          parsed?.operationState && validStates.has(parsed.operationState)
+            ? parsed.operationState
+            : 'unknown';
+
+        const lifts = Array.isArray(parsed?.lifts)
+          ? parsed.lifts
+              .filter(
+                (item) =>
+                  item &&
+                  typeof item.name === 'string' &&
+                  typeof item.status === 'string',
+              )
+              .slice(0, 8)
+              .map((item) => ({
+                name: item.name.trim(),
+                status: item.status.trim(),
+                hours:
+                  typeof item.hours === 'string' && item.hours.trim()
+                    ? item.hours.trim()
+                    : undefined,
+                note:
+                  typeof item.note === 'string' && item.note.trim()
+                    ? item.note.trim()
+                    : undefined,
+              }))
+          : [];
+
+        const payload: LiveLiftPayload = {
+          resortId,
+          operationState: opState,
+          statusBadgeText:
+            typeof parsed?.statusBadgeText === 'string' &&
+            parsed.statusBadgeText.trim()
+              ? parsed.statusBadgeText.trim()
+              : '已取得最新營運情報',
+          openLiftsSummary:
+            typeof parsed?.openLiftsSummary === 'string' &&
+            parsed.openLiftsSummary.trim()
+              ? parsed.openLiftsSummary.trim()
+              : '詳見下方摘要與官網',
+          operatingHours:
+            typeof parsed?.operatingHours === 'string' &&
+            parsed.operatingHours.trim()
+              ? parsed.operatingHours.trim()
+              : '請以官網公告為準',
+          nightSkiStatus:
+            typeof parsed?.nightSkiStatus === 'string'
+              ? parsed.nightSkiStatus.trim()
+              : '',
+          officialSnowDepth:
+            typeof parsed?.officialSnowDepth === 'string' &&
+            parsed.officialSnowDepth.trim()
+              ? parsed.officialSnowDepth.trim()
+              : '請參閱官網實測',
+          advisory:
+            typeof parsed?.advisory === 'string' ? parsed.advisory.trim() : '',
+          lifts,
+          summaryMarkdown: parsed ? undefined : rawText,
+          sources,
+          fetchedAt: new Date().toISOString(),
+        };
+
+        liftMemoryCache[resortId] = {
+          expiresAt: Date.now() + LIFT_CACHE_TTL_MS,
+          payload,
+        };
+        res.json(payload);
+        return;
+      } catch (err: unknown) {
+        lastErrMsg =
+          err instanceof Error ? err.message : '即時纜車情報查詢失敗';
+        const isRetryable =
+          lastErrMsg.includes('503') || lastErrMsg.includes('UNAVAILABLE');
+        if (attempt === 0 && isRetryable) {
+          await new Promise((r) => setTimeout(r, 900));
+          continue;
+        }
+        console.error('[ski/lifts] Gemini Search Grounding error:', lastErrMsg);
+        break;
+      }
+    }
+
+    if (
+      lastErrMsg.includes('429') ||
+      lastErrMsg.includes('RESOURCE_EXHAUSTED')
+    ) {
+      res.status(429).json({
+        error:
+          '即時檢索配額暫時已達上限，請稍後再試，或直接點擊下方官網連結查閱最新纜車表。',
+      });
+      return;
+    }
+
+    if (
+      lastErrMsg.includes('403') ||
+      lastErrMsg.includes('PERMISSION_DENIED') ||
+      lastErrMsg.includes('API_KEY_INVALID')
+    ) {
+      res.status(403).json({
+        error: 'Gemini API 金鑰權限不足或無效，請於 Settings > Secrets 檢查。',
+      });
+      return;
+    }
+
+    res.status(502).json({
+      error:
+        '暫時未能取得即時纜車狀況，下方已完整保留常規營業時間表及官網直達連結。',
+    });
+  });
+
+  // Google Places API (New) server-side photo proxy for the 6 highway drive stops
+  // Docs: https://developers.google.com/maps/documentation/places/web-service/place-photos?utm_campaign=gmp_mcp_codeassist_v1_aistudio
+  interface StopPhotoResult {
+    photoUri: string | null;
+    attributionName?: string;
+    attributionUri?: string;
+  }
+
+  const STOP_PHOTO_TARGETS: Array<{
+    stopId: string;
+    placeId?: string;
+    textQuery?: string;
+  }> = [
+    {stopId: 'narita-t3', placeId: 'ChIJYd_6WXnzImAR89wPaFU25-8'},
+    {stopId: 'miyoshi-pa', placeId: 'ChIJPZZcG-TcGGAReH_JmzI5t5A'},
+    {stopId: 'aeon-takasaki', placeId: 'ChIJ9RKkNYSMHmARnWhbGboVq_Q'},
+    {stopId: 'matsushiro-pa', placeId: 'ChIJlXPx48WEHWARtfIzJcirHHA'},
+    {
+      stopId: 'maple-house',
+      textQuery: 'Maple House Backpackers Madarao Iiyama Nagano',
+    },
+    {stopId: 'silk-in-madarao', placeId: 'ChIJ6-PetV0j9l8RvC39yyIm7lw'},
+  ];
+
+  // Short-lived in-memory dedupe cache (5 min) to prevent burst traffic against Demo Key quota without permanent caching
+  const STOP_PHOTO_DEDUPE_TTL_MS = 5 * 60 * 1000;
+  let stopPhotosCache: {
+    expiresAt: number;
+    photos: Record<string, StopPhotoResult>;
+    quotaExceeded: boolean;
+  } | null = null;
+
+  interface PlacesPhotoEntry {
+    name?: string;
+    authorAttributions?: Array<{
+      displayName?: string;
+      uri?: string;
+    }>;
+  }
+
+  async function resolveStopPhoto(
+    target: {stopId: string; placeId?: string; textQuery?: string},
+    mapsKey: string,
+  ): Promise<{result: StopPhotoResult; quotaExceeded: boolean}> {
+    let firstPhoto: PlacesPhotoEntry | undefined;
+
+    if (target.placeId) {
+      const detailRes = await fetch(
+        `https://places.googleapis.com/v1/places/${encodeURIComponent(target.placeId)}?languageCode=ja`,
+        {
+          method: 'GET',
+          headers: {
+            'X-Goog-Api-Key': mapsKey,
+            'X-Goog-FieldMask': 'photos',
+          },
+        },
+      );
+      if (detailRes.status === 429) {
+        return {result: {photoUri: null}, quotaExceeded: true};
+      }
+      if (!detailRes.ok) {
+        const bodyText = await detailRes.text().catch(() => '');
+        if (bodyText.includes('RESOURCE_EXHAUSTED')) {
+          return {result: {photoUri: null}, quotaExceeded: true};
+        }
+        return {result: {photoUri: null}, quotaExceeded: false};
+      }
+      const detailJson = (await detailRes.json()) as {
+        photos?: PlacesPhotoEntry[];
+      };
+      firstPhoto = detailJson.photos?.[0];
+    } else if (target.textQuery) {
+      const searchRes = await fetch(
+        'https://places.googleapis.com/v1/places:searchText',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': mapsKey,
+            'X-Goog-FieldMask': 'places.photos',
+          },
+          body: JSON.stringify({
+            textQuery: target.textQuery,
+            languageCode: 'ja',
+            regionCode: 'JP',
+            maxResultCount: 1,
+          }),
+        },
+      );
+      if (searchRes.status === 429) {
+        return {result: {photoUri: null}, quotaExceeded: true};
+      }
+      if (!searchRes.ok) {
+        const bodyText = await searchRes.text().catch(() => '');
+        if (bodyText.includes('RESOURCE_EXHAUSTED')) {
+          return {result: {photoUri: null}, quotaExceeded: true};
+        }
+        return {result: {photoUri: null}, quotaExceeded: false};
+      }
+      const searchJson = (await searchRes.json()) as {
+        places?: Array<{photos?: PlacesPhotoEntry[]}>;
+      };
+      firstPhoto = searchJson.places?.[0]?.photos?.[0];
+    }
+
+    if (!firstPhoto?.name) {
+      return {result: {photoUri: null}, quotaExceeded: false};
+    }
+
+    const mediaRes = await fetch(
+      `https://places.googleapis.com/v1/${firstPhoto.name}/media?maxWidthPx=900&skipHttpRedirect=true`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Goog-Api-Key': mapsKey,
+        },
+      },
+    );
+    if (mediaRes.status === 429) {
+      return {result: {photoUri: null}, quotaExceeded: true};
+    }
+    if (!mediaRes.ok) {
+      return {result: {photoUri: null}, quotaExceeded: false};
+    }
+    const mediaJson = (await mediaRes.json()) as {photoUri?: string};
+    const attribution = firstPhoto.authorAttributions?.[0];
+
+    return {
+      result: {
+        photoUri:
+          typeof mediaJson.photoUri === 'string' && mediaJson.photoUri.trim()
+            ? mediaJson.photoUri.trim()
+            : null,
+        attributionName: attribution?.displayName?.trim() || undefined,
+        attributionUri: attribution?.uri?.trim() || undefined,
+      },
+      quotaExceeded: false,
+    };
+  }
+
+  app.get('/api/places/stop-photos', async (_req: Request, res: Response) => {
+    const mapsKey = getMapsBrowserApiKey();
+    if (!mapsKey) {
+      res.json({photos: {}, quotaExceeded: false});
+      return;
+    }
+
+    if (stopPhotosCache && stopPhotosCache.expiresAt > Date.now()) {
+      res.json({
+        photos: stopPhotosCache.photos,
+        quotaExceeded: stopPhotosCache.quotaExceeded,
+      });
+      return;
+    }
+
+    let quotaExceeded = false;
+    const photos: Record<string, StopPhotoResult> = {};
+
+    await Promise.all(
+      STOP_PHOTO_TARGETS.map(async (target) => {
+        try {
+          const outcome = await resolveStopPhoto(target, mapsKey);
+          if (outcome.quotaExceeded) {
+            quotaExceeded = true;
+          }
+          if (outcome.result.photoUri) {
+            photos[target.stopId] = outcome.result;
+          }
+        } catch (err: unknown) {
+          console.warn(
+            `[places/stop-photos] Failed for ${target.stopId}:`,
+            err instanceof Error ? err.message : String(err),
+          );
+        }
+      }),
+    );
+
+    stopPhotosCache = {
+      expiresAt: Date.now() + STOP_PHOTO_DEDUPE_TTL_MS,
+      photos,
+      quotaExceeded,
+    };
+
+    res.json({photos, quotaExceeded});
   });
 
   if (!IS_PROD) {

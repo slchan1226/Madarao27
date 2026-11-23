@@ -89,15 +89,12 @@ export const HotelTab: React.FC<HotelTabProps> = ({
       aria-labelledby="tab-hotel"
       className="space-y-4"
     >
-      <div className="glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-5">
+      <div className="glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
         <div>
-          <span className="text-[11px] font-bold tracking-widest text-sky-700 uppercase">
-            STEP 3 · ACCOMMODATION
-          </span>
-          <h2 className="font-serif text-xl font-bold text-slate-900">
+          <h2 className="font-serif text-lg sm:text-xl font-bold text-slate-900">
             倉本温泉 ホテルシルクイン斑尾
           </h2>
-          <p className="text-xs text-slate-600 mt-1">
+          <p className="text-xs text-slate-600 mt-1 tabular-nums">
             預約編號：<strong>1235</strong> ｜ 2027/02/14 – 02/20（共 6 晚）
           </p>
         </div>
@@ -109,8 +106,8 @@ export const HotelTab: React.FC<HotelTabProps> = ({
           >
             <div className="flex items-center justify-between gap-2">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">
-                  MY ROOM · 已置頂儲存
+                <span className="text-[11px] font-semibold text-sky-200">
+                  我的置頂房間
                 </span>
                 <div id="my-room-title" className="text-base font-bold mt-0.5">
                   {myRoom}
@@ -120,7 +117,7 @@ export const HotelTab: React.FC<HotelTabProps> = ({
                 type="button"
                 onClick={onClearRoom}
                 aria-label="取消標記我的房間"
-                className="min-h-[48px] min-w-[48px] text-xs bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl font-bold transition cursor-pointer"
+                className="min-h-[44px] min-w-[48px] text-xs bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl font-bold transition cursor-pointer"
               >
                 取消
               </button>
@@ -128,26 +125,26 @@ export const HotelTab: React.FC<HotelTabProps> = ({
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2.5 text-xs">
-          <div className="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+        <div className="grid grid-cols-2 gap-2.5 text-xs tabular-nums">
+          <div className="bg-sky-50/80 border border-sky-100 rounded-2xl p-3">
             <div className="text-slate-600 font-medium">入住 / 退房時間</div>
             <div className="font-bold text-slate-900 mt-0.5">
               15:00 後 / 10:00 前
             </div>
           </div>
-          <div className="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+          <div className="bg-sky-50/80 border border-sky-100 rounded-2xl p-3">
             <div className="text-slate-600 font-medium">膳食安排</div>
             <div className="font-bold text-slate-900 mt-0.5">
               包早晚自助餐 Buffet
             </div>
           </div>
-          <div className="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+          <div className="bg-sky-50/80 border border-sky-100 rounded-2xl p-3">
             <div className="text-slate-600 font-medium">住客泊車</div>
             <div className="font-bold text-emerald-800 mt-0.5">
               免費停車場（免預約）
             </div>
           </div>
-          <div className="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+          <div className="bg-sky-50/80 border border-sky-100 rounded-2xl p-3">
             <div className="text-slate-600 font-medium">酒店雪具租借</div>
             <div className="font-bold text-slate-900 mt-0.5">
               板鞋 ¥4,000 / 衫褲 ¥2,000
@@ -156,15 +153,15 @@ export const HotelTab: React.FC<HotelTabProps> = ({
         </div>
 
         <div>
-          <h3 className="text-sm font-bold text-slate-900 mb-2.5 flex items-center justify-between gap-2">
+          <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5">
               <DoorOpen
                 className="w-4 h-4 text-sky-700 shrink-0"
                 aria-hidden="true"
               />
-              <span>本館和洋室房號（點星號標記自己房間）</span>
+              <span>本館和洋室房號（點星號置頂）</span>
             </span>
-            <span className="text-[11px] font-medium text-slate-600 shrink-0">
+            <span className="text-[11px] font-medium text-slate-500 shrink-0 tabular-nums">
               29–36㎡ 禁煙
             </span>
           </h3>
@@ -177,15 +174,19 @@ export const HotelTab: React.FC<HotelTabProps> = ({
               return (
                 <div
                   key={room.roomKey}
-                  className={`flex items-center justify-between px-3.5 py-2 ${
-                    room.striped ? 'bg-slate-50/70' : 'bg-white'
+                  className={`flex items-center justify-between px-3.5 py-1.5 ${
+                    isPinned
+                      ? 'bg-sky-50/80'
+                      : room.striped
+                        ? 'bg-slate-50/70'
+                        : 'bg-white'
                   }`}
                 >
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 tabular-nums">
                     <span className="font-bold text-snow-900 text-sm">
                       {room.label}
                     </span>
-                    <span className={`ui-pill ${room.badgeClass}`}>
+                    <span className="text-xs font-medium text-slate-600">
                       {room.badge}
                     </span>
                   </div>
@@ -194,13 +195,13 @@ export const HotelTab: React.FC<HotelTabProps> = ({
                     onClick={() => onSetRoom(room.roomKey)}
                     aria-label={room.ariaLabel}
                     aria-pressed={isPinned}
-                    className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:bg-sky-50 hover:text-sky-700 transition cursor-pointer"
                   >
                     <Star
                       className={`w-4 h-4 ${
                         isPinned
                           ? 'fill-amber-500 text-amber-500'
-                          : 'text-slate-600'
+                          : 'text-slate-400'
                       }`}
                       aria-hidden="true"
                     />

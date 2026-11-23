@@ -1,6 +1,7 @@
-import React from 'react';
-import {Clock, CornerUpRight} from 'lucide-react';
+import React, {useState} from 'react';
+import {ChevronDown, ChevronUp, Clock, CornerUpRight, Map} from 'lucide-react';
 import {LocalSpotsExplorer} from './LocalSpotsExplorer';
+import {NearbyRestaurantsSection} from './NearbyRestaurantsSection';
 import {OfflineDistanceTool} from './OfflineDistanceTool';
 import {LocalDriveSvg} from './SkiMapSvgs';
 
@@ -9,146 +10,185 @@ interface LocalTabProps {
   onCopyText: (text: string) => void;
 }
 
+interface PrimaryDriveRoute {
+  id: string;
+  order: string;
+  title: string;
+  subtitle: string;
+  distanceKm: string;
+  driveTime: string;
+  summary: string;
+  mapsHref: string;
+  ctaLabel: string;
+  ariaLabel: string;
+  accentBarClass: string;
+  ctaClass: string;
+}
+
+const PRIMARY_ROUTES: PrimaryDriveRoute[] = [
+  {
+    id: 'iiyama',
+    order: '01',
+    title: '飯山市區 / JR 飯山站周邊',
+    subtitle: '飯山市街・縣道 97 號落山直達',
+    distanceKm: '13 km',
+    driveTime: '20–25 分鐘',
+    summary:
+      '最近市中心，集中 Tsuruya 大型超市、藥妝、拉麵、壽司居酒屋與便利店，夜晚補貨或宵夜最方便。',
+    mapsHref:
+      'https://www.google.com/maps/dir/?api=1&destination=Iiyama+Station+Nagano&travelmode=driving',
+    ctaLabel: '導航去 飯山市區（JR 飯山站）',
+    ariaLabel: '一鍵導航去飯山市區 JR 飯山站',
+    accentBarClass: 'bg-sky-600',
+    ctaClass: 'bg-sky-700 hover:bg-sky-800 text-white',
+  },
+  {
+    id: 'romance',
+    order: '02',
+    title: 'スノーリゾートロマンスの神様',
+    subtitle: '長野県下高井郡木島平村大字上木島 3876-2',
+    distanceKm: '20 km',
+    driveTime: '30–35 分鐘',
+    summary:
+      '落山經飯山市區過千曲川大橋上高社山即達，朝早 08:15 由酒店出發啱啱好趕上開門頭纜車。',
+    mapsHref:
+      'https://www.google.com/maps/dir/?api=1&destination=Snow+Resort+Romance+no+Kamisama&travelmode=driving',
+    ctaLabel: '導航去 ロマンスの神様',
+    ariaLabel: '一鍵導航去スノーリゾートロマンスの神様',
+    accentBarClass: 'bg-rose-600',
+    ctaClass: 'bg-rose-700 hover:bg-rose-800 text-white',
+  },
+  {
+    id: 'nozawa',
+    order: '03',
+    title: '野沢温泉スキー場（長坂中心 / 日影）',
+    subtitle: '長坂センターハウス · Tel 0269-85-3166',
+    distanceKm: '26 km',
+    driveTime: '40–45 分鐘',
+    summary:
+      '沿千曲川國道 117 號北上，最後上溫泉村斜路較窄多雪建議留 45 分鐘，滑完可順道逛溫泉街。',
+    mapsHref:
+      'https://www.google.com/maps/dir/?api=1&destination=Nozawa+Onsen+Snow+Resort+Nagasaka+Center+House&travelmode=driving',
+    ctaLabel: '導航去 野沢温泉スキー場',
+    ariaLabel: '一鍵導航去野沢温泉スキー場長坂中心',
+    accentBarClass: 'bg-snow-900',
+    ctaClass: 'bg-snow-900 hover:bg-snow-700 text-white',
+  },
+];
+
 export const LocalTab: React.FC<LocalTabProps> = ({isOnline, onCopyText}) => {
+  const [showOverviewMap, setShowOverviewMap] = useState(false);
+
   return (
     <section
       id="panel-local"
       role="tabpanel"
       aria-labelledby="tab-local"
-      className="space-y-5"
+      className="space-y-4"
     >
-      <div className="glass-card jp-pattern-subtle rounded-3xl p-5 space-y-3">
-        <span className="text-[11px] font-bold tracking-widest text-sky-700 uppercase">
-          LOCAL DRIVE · 周辺ドライブ
-        </span>
-        <h2 className="font-serif text-xl font-bold text-slate-900">
-          由酒店出發・周邊自駕路線與時間
-        </h2>
-        <p className="text-xs text-slate-700 leading-relaxed">
-          所有路線均以<strong>倉本温泉 ホテルシルクイン斑尾</strong>
-          為出發參考，撳藍色按鈕會自動用 Google Maps App 由你
-          <strong>當下即時位置</strong>規劃駕車導航。
-        </p>
-
-        <div className="bg-gradient-to-b from-sky-50 to-white rounded-2xl p-3 border border-sky-100 shadow-inner">
-          <LocalDriveSvg />
+      {/* 精簡出發參考與可收起示意圖 */}
+      <div className="glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-slate-900">
+              由酒店出發・周邊自駕
+            </h2>
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+              以<strong>ホテルシルクイン斑尾</strong>為基準；點擊導航會由你的
+              <strong>當下位置</strong>直接規劃雪地路線。
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowOverviewMap((prev) => !prev)}
+            aria-expanded={showOverviewMap}
+            aria-controls="local-drive-svg-panel"
+            className="min-h-[40px] px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 text-xs font-bold inline-flex items-center gap-1 shrink-0 whitespace-nowrap transition cursor-pointer"
+          >
+            <Map className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>{showOverviewMap ? '收起示意圖' : '路線示意圖'}</span>
+            {showOverviewMap ? (
+              <ChevronUp className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <ChevronDown
+                className="w-3.5 h-3.5 shrink-0"
+                aria-hidden="true"
+              />
+            )}
+          </button>
         </div>
+
+        {showOverviewMap && (
+          <div
+            id="local-drive-svg-panel"
+            className="bg-gradient-to-b from-sky-50 to-white rounded-2xl p-3 border border-sky-100 shadow-inner"
+          >
+            <LocalDriveSvg />
+          </div>
+        )}
       </div>
 
-      {/* 路線 1：酒店 -> 飯山市區（置頂主力導航） */}
-      <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-1.5">
-          <span className="ui-pill text-sky-800 bg-sky-100">
-            路線 01 · 距離約 13 km
-          </span>
-          <span className="text-xs font-bold text-slate-800 inline-flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-sky-700" aria-hidden="true" />
-            <span>雪地車程：約 20 – 25 分鐘</span>
-          </span>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">
-            飯山市區 / JR 飯山站周邊
-          </h3>
-          <p className="text-xs text-slate-600">
-            日文對照：飯山市街・飯山駅（縣道 97 號落山直達）
-          </p>
-        </div>
-        <p className="text-sm text-slate-700 leading-relaxed">
-          由斑尾高原落山最近嘅市中心！有大型超市（
-          <strong>Tsuruya ツルヤ 飯山店</strong>
-          ）、站內餐廳與手信店、藥妝店、居酒屋、拉麵店及便利店，晚上想出市區買啤酒零食或食宵夜最方便。
-        </p>
-        <a
-          href="https://www.google.com/maps/dir/?api=1&destination=Iiyama+Station+Nagano&travelmode=driving"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="一鍵導航去飯山市區 JR 飯山站"
-          className="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm"
-        >
-          <CornerUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-          <span>一鍵導航去 飯山市區（JR 飯山站）</span>
-        </a>
+      {/* 3 條置頂主力導航路線（俐落精簡卡） */}
+      <div className="space-y-3">
+        {PRIMARY_ROUTES.map((route) => (
+          <div
+            key={route.id}
+            className="glass-card rounded-3xl overflow-hidden shadow-sm border border-slate-200/80"
+          >
+            <div className="p-4 sm:p-5 space-y-2.5">
+              <div className="flex items-center justify-between gap-2 text-xs tabular-nums">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 ${route.accentBarClass}`}
+                    aria-hidden="true"
+                  />
+                  <span className="font-bold text-slate-600">
+                    路線 {route.order} · 約 {route.distanceKm}
+                  </span>
+                </div>
+                <span className="font-bold text-slate-900 inline-flex items-center gap-1 shrink-0">
+                  <Clock
+                    className="w-3.5 h-3.5 text-sky-700 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>雪地 {route.driveTime}</span>
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                  {route.title}
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {route.subtitle}
+                </p>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {route.summary}
+              </p>
+
+              <a
+                href={route.mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={route.ariaLabel}
+                className={`nav-btn min-h-[46px] w-full inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold py-2.5 px-4 rounded-2xl shadow-sm transition ${route.ctaClass}`}
+              >
+                <CornerUpRight
+                  className="w-4 h-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{route.ctaLabel}</span>
+              </a>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* 路線 2：酒店 -> スノーリゾートロマンスの神様 */}
-      <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-1.5">
-          <span className="ui-pill text-rose-800 bg-rose-100">
-            路線 02 · 距離約 20 km
-          </span>
-          <span className="text-xs font-bold text-slate-800 inline-flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-rose-700" aria-hidden="true" />
-            <span>雪地車程：約 30 – 35 分鐘</span>
-          </span>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">
-            スノーリゾートロマンスの神様
-          </h3>
-          <p className="text-xs text-slate-600">
-            日文對照：長野県下高井郡木島平村大字上木島 3876-2
-          </p>
-        </div>
-        <p className="text-sm text-slate-700 leading-relaxed">
-          由斑尾落山穿過飯山市區（過千曲川大橋）後上高社山即達，全程約半小時，朝早
-          08:15 由酒店出發啱啱好趕到開門頭纜車。
-        </p>
-        <a
-          href="https://www.google.com/maps/dir/?api=1&destination=Snow+Resort+Romance+no+Kamisama&travelmode=driving"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="一鍵導航去スノーリゾートロマンスの神様"
-          className="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-rose-700 hover:bg-rose-800 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm"
-        >
-          <CornerUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-          <span>一鍵導航去 スノーリゾートロマンスの神様</span>
-        </a>
-      </div>
-
-      {/* 路線 3：酒店 -> 野沢温泉スキー場 */}
-      <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-1.5">
-          <span className="ui-pill text-white bg-snow-900">
-            路線 03 · 距離約 26 km
-          </span>
-          <span className="text-xs font-bold text-slate-800 inline-flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-snow-800" aria-hidden="true" />
-            <span>雪地車程：約 40 – 45 分鐘</span>
-          </span>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">
-            野沢温泉スキー場（長坂中心 / 日影）
-          </h3>
-          <p className="text-xs text-slate-600">
-            日文對照：野沢温泉スキー場 長坂センターハウス（Tel: 0269-85-3166）
-          </p>
-        </div>
-        <p className="text-sm text-slate-700 leading-relaxed">
-          落山經飯山市區後沿千曲川（國道 117
-          號）向北行駛，最後一段上野澤溫泉村斜路較窄且多積雪，建議預留 45
-          分鐘車程，滑完雪仲可以順便行溫泉街同食溫泉蛋！
-        </p>
-        <a
-          href="https://www.google.com/maps/dir/?api=1&destination=Nozawa+Onsen+Snow+Resort+Nagasaka+Center+House&travelmode=driving"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="一鍵導航去野沢温泉スキー場長坂中心"
-          className="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-snow-900 hover:bg-snow-700 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm"
-        >
-          <CornerUpRight
-            className="w-4 h-4 text-sky-300 shrink-0"
-            aria-hidden="true"
-          />
-          <span>一鍵導航去 野沢温泉スキー場</span>
-        </a>
-      </div>
-
-      {/* 周邊地標分類篩選（溫泉／餐廳／超商與店鋪／景點）＋ 離線資料與 Google Maps 即時查詢 */}
+      {/* 三大統一手風琴（全部預設收起） */}
+      <NearbyRestaurantsSection onCopyText={onCopyText} />
       <LocalSpotsExplorer isOnline={isOnline} onCopyText={onCopyText} />
-
-      {/* 離線版地標距離、雪地車程與耗油量查詢工具 */}
       <OfflineDistanceTool />
     </section>
   );

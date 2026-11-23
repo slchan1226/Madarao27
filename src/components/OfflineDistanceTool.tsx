@@ -1,6 +1,8 @@
 import React, {useMemo, useState} from 'react';
 import {
   ArrowLeftRight,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Compass,
   CornerUpRight,
@@ -8,7 +10,6 @@ import {
   LocateFixed,
   MapPin,
   Search,
-  ShieldCheck,
   Snowflake,
   Sun,
 } from 'lucide-react';
@@ -78,6 +79,7 @@ export const OfflineDistanceTool: React.FC = () => {
   const [kmPerLiter, setKmPerLiter] = useState<number>(readStoredKmPerL);
   const [showAllLandmarks, setShowAllLandmarks] = useState<boolean>(false);
 
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [gpsStatus, setGpsStatus] = useState<string | null>(null);
 
@@ -192,23 +194,43 @@ export const OfflineDistanceTool: React.FC = () => {
     origin.type === 'landmark' ? origin.landmark.name : origin.label;
 
   return (
-    <div className="glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 shadow-sm border border-sky-200/80 space-y-4">
-      {/* 標題與離線標示 */}
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <span className="text-[11px] font-bold tracking-widest text-sky-700 uppercase inline-flex items-center gap-1">
+    <div className="glass-card jp-pattern-subtle rounded-3xl shadow-sm border border-sky-200/80 overflow-hidden">
+      {/* 可展開／收起標題欄（預設收起，與周邊餐廳及地標一致） */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded((prev) => !prev)}
+        aria-expanded={isExpanded}
+        aria-controls="offline-distance-tool-body"
+        className="w-full min-h-[60px] p-4 sm:p-5 text-left flex items-center justify-between gap-3 hover:bg-sky-50/40 transition cursor-pointer"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 text-sky-700 text-[11px] font-bold tracking-wider">
             <Compass className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>OFFLINE DISTANCE &amp; FUEL</span>
-          </span>
-          <h3 className="font-serif text-lg font-bold text-snow-900 mt-0.5">
-            離線地標距離・車程與油耗查詢
+            <span>100% 離線可用・山區無網照計</span>
+          </div>
+          <h3 className="font-serif text-base sm:text-lg font-bold text-snow-900 mt-0.5">
+            離線地標距離・雪地車程與油耗計算
           </h3>
+          <p className="text-[11px] text-slate-500 mt-0.5">
+            支援 GPS 定位、雪地／乾爽路況與車型油耗估算（{OFFLINE_LANDMARKS.length} 個地標）
+          </p>
         </div>
-        <span className="ui-pill bg-emerald-100 text-emerald-950 border border-emerald-300">
-          <ShieldCheck className="w-3 h-3 shrink-0" aria-hidden="true" />
-          <span>100% 離線可用</span>
+
+        <span className="min-h-[36px] px-2.5 py-1 rounded-xl bg-sky-50 text-sky-900 border border-sky-200 text-xs font-bold inline-flex items-center gap-1 shrink-0 whitespace-nowrap">
+          <span>{isExpanded ? '收起' : '展開'}</span>
+          {isExpanded ? (
+            <ChevronUp className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+          )}
         </span>
-      </div>
+      </button>
+
+      {isExpanded && (
+        <div
+          id="offline-distance-tool-body"
+          className="px-4 pb-4 sm:px-5 sm:pb-5 pt-3 border-t border-sky-200/60 space-y-4"
+        >
 
       {/* 當前位置輸入框 + 本機 GPS 定位 */}
       <div className="space-y-2.5">
@@ -495,7 +517,7 @@ export const OfflineDistanceTool: React.FC = () => {
               </a>
             </div>
 
-            <div className="grid grid-cols-3 gap-1.5 text-center">
+            <div className="grid grid-cols-3 gap-1.5 text-center tabular-nums">
               <div className="bg-slate-50 border border-slate-200/70 rounded-xl py-1.5 px-2">
                 <span className="block text-[10px] text-slate-500 font-medium">
                   {tripMode === 'roundtrip' ? '來回距離' : '估計距離'}
@@ -535,6 +557,8 @@ export const OfflineDistanceTool: React.FC = () => {
       <p className="text-[10px] text-slate-500 leading-relaxed">
         ※ 距離已結合信州山區實際道路數據及離線球面演算法估算，油費以日本 Regular 汽油約 ¥{DEFAULT_GAS_PRICE_YEN}/L 參考計算；大雪塞車或結冰路段請額外預留 10–15 分鐘緩衝。
       </p>
+        </div>
+      )}
     </div>
   );
 };

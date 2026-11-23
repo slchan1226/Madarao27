@@ -204,6 +204,7 @@ export const LocalSpotsExplorer: React.FC<LocalSpotsExplorerProps> = ({
     useState<GroundedCacheMap>(readGroundedCache);
   const [isGroundingLoading, setIsGroundingLoading] = useState<boolean>(false);
   const [groundingError, setGroundingError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [showMapView, setShowMapView] = useState<boolean>(true);
   const [selectedMapSpotId, setSelectedMapSpotId] = useState<string | null>(
     null,
@@ -318,23 +319,49 @@ export const LocalSpotsExplorer: React.FC<LocalSpotsExplorerProps> = ({
   const activeMeta = SPOT_CATEGORY_META[selectedCategory];
 
   return (
-    <div className="glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 shadow-sm border border-sky-200/80 space-y-4">
-      {/* 標題與離線保障標籤 */}
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
+    <div className="glass-card jp-pattern-subtle rounded-3xl shadow-sm border border-sky-200/80 overflow-hidden">
+      {/* 可展開／收起標題欄（預設收起以保持頁面俐落） */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded((prev) => !prev)}
+        aria-expanded={isExpanded}
+        aria-controls="local-spots-explorer-body"
+        className="w-full min-h-[60px] p-4 sm:p-5 text-left flex items-center justify-between gap-3 hover:bg-sky-50/40 transition cursor-pointer"
+      >
+        <div className="min-w-0 flex-1">
           <span className="text-[11px] font-bold tracking-widest text-sky-700 uppercase inline-flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>LOCAL SPOTS &amp; GEAR DIRECTORY</span>
+            <span>LOCAL SPOTS DIRECTORY</span>
           </span>
-          <h3 className="font-serif text-lg font-bold text-snow-900 mt-0.5">
-            周邊地標＆雪具店（高階粉雪板／溫泉／餐廳／超商／景點）
+          <h3 className="font-serif text-base sm:text-lg font-bold text-snow-900 mt-0.5">
+            周邊地標（溫泉／餐廳／超市／7仔／景點）
           </h3>
+          <p className="text-[11px] text-slate-500 mt-0.5">
+            內置 {OFFLINE_LOCAL_SPOTS.length} 個離線地標（含高階雪具店及互動 Google 地圖）
+          </p>
         </div>
-        <span className="ui-pill bg-emerald-100 text-emerald-950 border border-emerald-300">
-          <ShieldCheck className="w-3 h-3 shrink-0" aria-hidden="true" />
-          <span>離線精確載入</span>
-        </span>
-      </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>離線可用</span>
+          </span>
+          <span className="min-h-[36px] px-2.5 py-1 rounded-xl bg-sky-50 text-sky-900 border border-sky-200 text-xs font-bold inline-flex items-center gap-1 whitespace-nowrap">
+            <span>{isExpanded ? '收起' : '展開'}</span>
+            {isExpanded ? (
+              <ChevronUp className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            )}
+          </span>
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div
+          id="local-spots-explorer-body"
+          className="px-4 pb-4 sm:px-5 sm:pb-5 pt-2 border-t border-sky-200/60 space-y-4"
+        >
 
       {/* 分類篩選器 */}
       <div
@@ -675,6 +702,8 @@ export const LocalSpotsExplorer: React.FC<LocalSpotsExplorerProps> = ({
           );
         })}
       </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,12 +1,25 @@
 import React from 'react';
-import {ArrowRight, ExternalLink, Luggage, Plane} from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ExternalLink,
+  Info,
+  Luggage,
+  Plane,
+} from 'lucide-react';
 import type {TabId} from '../types/trip';
 
 interface FlightTabProps {
+  isBackupMode?: boolean;
+  onBackHome?: () => void;
   onNavigateTab: (tab: TabId) => void;
 }
 
-export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
+export const FlightTab: React.FC<FlightTabProps> = ({
+  isBackupMode = false,
+  onBackHome,
+  onNavigateTab,
+}) => {
   return (
     <section
       id="panel-flight"
@@ -14,12 +27,33 @@ export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
       aria-labelledby="tab-flight"
       className="space-y-4"
     >
+      {isBackupMode && (
+        <div className="bg-sky-50 border border-sky-200 rounded-2xl p-3 flex items-center justify-between gap-2 text-xs text-sky-950">
+          <div className="flex items-start gap-2 min-w-0">
+            <Info
+              className="w-4 h-4 text-sky-700 shrink-0 mt-0.5"
+              aria-hidden="true"
+            />
+            <span className="leading-snug">
+              目前為<strong>航班備查模式</strong>（2 月 19 日起會自動恢復顯示於底部主導航）
+            </span>
+          </div>
+          {onBackHome && (
+            <button
+              type="button"
+              onClick={onBackHome}
+              className="min-h-[36px] px-2.5 py-1 rounded-xl bg-white hover:bg-sky-100 text-sky-900 border border-sky-200 font-bold inline-flex items-center gap-1 shrink-0 whitespace-nowrap transition cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>回首頁</span>
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
         <div>
-          <span className="text-[11px] font-bold tracking-widest text-sky-700 uppercase">
-            STEP 1 · FLIGHT SCHEDULE
-          </span>
-          <h2 className="font-serif text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
+          <h2 className="font-serif text-lg sm:text-xl font-bold text-slate-900">
             捷星日本 Jetstar Japan 航班資訊
           </h2>
           <p className="text-xs text-slate-600 mt-1">
@@ -28,15 +62,11 @@ export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
         </div>
 
         {/* 去程航班 */}
-        <div className="bg-sky-50/85 border border-sky-200 rounded-2xl p-3.5 sm:p-4">
+        <div className="bg-sky-50/85 border border-sky-200 rounded-2xl p-3.5 sm:p-4 tabular-nums">
           <div className="flex flex-wrap items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className="ui-pill text-white bg-sky-700">
-                去程 OUTBOUND
-              </span>
-              <span className="ui-pill text-sky-800 bg-white/85 border border-sky-200">
-                A320
-              </span>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold text-sky-900">去程 OUTBOUND</span>
+              <span className="text-sky-700/80 font-medium">· A320</span>
             </div>
             <span className="text-xs font-bold text-sky-900 whitespace-nowrap">
               2027年2月14日 (日)
@@ -85,15 +115,11 @@ export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
         </div>
 
         {/* 回程航班 */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4">
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4 tabular-nums">
           <div className="flex flex-wrap items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className="ui-pill text-white bg-slate-800">
-                回程 INBOUND
-              </span>
-              <span className="ui-pill text-slate-700 bg-white border border-slate-200">
-                A320
-              </span>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold text-slate-900">回程 INBOUND</span>
+              <span className="text-slate-500 font-medium">· A320</span>
             </div>
             <span className="text-xs font-bold text-slate-800 whitespace-nowrap">
               2027年2月20日 (六)

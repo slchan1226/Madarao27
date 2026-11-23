@@ -54,6 +54,7 @@ export interface HourlyForecastItem {
   windKmh: number;
   weatherCode: number;
   precipProb: number | null;
+  snowProb: number;
 }
 
 export type BannerWeatherTheme =
@@ -70,6 +71,7 @@ export interface DerivedResortWeather {
   snowDepthSource: string;
   past72hSnowCm: number;
   total24hSnowCm: number;
+  snowProb24h: number;
   maxHourlySnowCm: number;
   min24hTemp: number;
   max24hTemp: number;
@@ -89,6 +91,7 @@ export interface DerivedResortWeather {
     range: string;
     snowSum: number;
     avgTemp: number;
+    snowProb: number;
   }>;
   elevationM: number;
 }
@@ -98,16 +101,20 @@ export interface DerivedResortWeather {
 // - ecmwf_ifs025, gfs_seamless, icon_global natively track ground snowpack (snow_depth),
 //   fixing JMA's missing/null snow_depth field in Japan.
 // - past_days=3 provides recent 72h snowfall accumulation for early-season snowpack accuracy.
-function buildOpenMeteoUrl(
+export function buildOpenMeteoUrl(
   latitude: number,
   longitude: number,
-  elevation: number,
+  elevation?: number,
 ): string {
+  const elevParam =
+    typeof elevation === 'number' && !Number.isNaN(elevation)
+      ? `&elevation=${Math.round(elevation)}`
+      : '';
   return (
     'https://api.open-meteo.com/v1/forecast' +
     `?latitude=${latitude}` +
     `&longitude=${longitude}` +
-    `&elevation=${elevation}` +
+    elevParam +
     '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,snowfall,snow_depth,is_day' +
     '&hourly=temperature_2m,snowfall,snow_depth,weather_code,wind_speed_10m,precipitation_probability' +
     '&models=best_match,ecmwf_ifs025,gfs_seamless,icon_global' +
@@ -340,6 +347,63 @@ function findNearestNumber(
   return null;
 }
 
+function isSnowWeatherCode(code: number): boolean {
+  return (
+    code === 71 ||
+    code === 73 ||
+    code === 75 ||
+    code === 77 ||
+    code === 85 ||
+    code === 86
+  );
+}
+
+function isRainWeatherCode(code: number): boolean {
+  return (code >= 51 && code <= 67) || (code >= 80 && code <= 82);
+}
+
+function computeHourlySnowProb(
+  precipProb: number | null,
+  snowfallCm: number,
+  tempC: number,
+  weatherCode: number,
+): number {
+  const isSnowCode = isSnowWeatherCode(weatherCode);
+  const isRainCode = isRainWeatherCode(weatherCode);
+
+  if (precipProb !== null) {
+    const clamped = Math.max(0, Math.min(100, Math.round(precipProb)));
+    if (snowfallCm > 0 || isSnowCode) {
+      if (snowfallCm >= 1.0) return Math.max(clamped, 75);
+      if (snowfallCm >= 0.2) return Math.max(clamped, 50);
+      return clamped;
+    }
+    if (tempC <= 1) {
+      return clamped;
+    }
+    if (tempC <= 2.5 && !isRainCode) {
+      return Math.round(clamped * 0.5);
+    }
+    return 0;
+  }
+
+  if (
+    snowfallCm >= 2.0 ||
+    weatherCode === 75 ||
+    weatherCode === 77 ||
+    weatherCode === 86
+  ) {
+    return 90;
+  }
+  if (snowfallCm >= 0.5 || isSnowCode) {
+    return 70;
+  }
+  if (snowfallCm > 0) {
+    return 45;
+  }
+  return 0;
+}
+
 export function deriveResortWeather(
   weatherData: OpenMeteoMultiModelResponse | undefined,
   fallbackElevation: number,
@@ -448,24 +512,37 @@ export function deriveResortWeather(
     const timeStr = times[i];
     const datePart = timeStr.slice(0, 10);
     const hourLabel = timeStr.slice(11, 16);
+    const snowfallCm = Number((readHourlyValueAt(snowSeries, i) ?? 0).toFixed(1));
+    const tempC = Math.round(readHourlyValueAt(tempSeries, i) ?? 0);
+    const windKmh = Math.round(readHourlyValueAt(windSeries, i) ?? 0);
+    const weatherCode = readHourlyValueAt(codeSeries, i) ?? 3;
+    const rawPrecipProb = readHourlyValueAt(precipSeries, i);
+    const precipProb = rawPrecipProb !== null ? Math.round(rawPrecipProb) : null;
+    const snowProb = computeHourlySnowProb(
+      precipProb,
+      snowfallCm,
+      tempC,
+      weatherCode,
+    );
+
     next24h.push({
       time: timeStr,
       hourLabel,
       isTomorrow: Boolean(currentDateStr && datePart !== currentDateStr),
-      snowfallCm: Number((readHourlyValueAt(snowSeries, i) ?? 0).toFixed(1)),
-      tempC: Math.round(readHourlyValueAt(tempSeries, i) ?? 0),
-      windKmh: Math.round(readHourlyValueAt(windSeries, i) ?? 0),
-      weatherCode: readHourlyValueAt(codeSeries, i) ?? 3,
-      precipProb:
-        readHourlyValueAt(precipSeries, i) !== null
-          ? Math.round(readHourlyValueAt(precipSeries, i) as number)
-          : null,
+      snowfallCm,
+      tempC,
+      windKmh,
+      weatherCode,
+      precipProb,
+      snowProb,
     });
   }
 
   const total24hSnowCm = Number(
     next24h.reduce((sum, item) => sum + item.snowfallCm, 0).toFixed(1),
   );
+  const snowProb24h =
+    next24h.length > 0 ? Math.max(...next24h.map((item) => item.snowProb)) : 0;
   const maxHourlySnowCm = Math.max(
     ...next24h.map((item) => item.snowfallCm),
     1,
@@ -491,6 +568,7 @@ export function deriveResortWeather(
       const avgTemp = Math.round(
         block.items.reduce((acc, i) => acc + i.tempC, 0) / block.items.length,
       );
+      const snowProb = Math.max(...block.items.map((i) => i.snowProb));
       const firstHour = block.items[0].hourLabel;
       const lastHour = block.items[block.items.length - 1].hourLabel;
       return {
@@ -498,6 +576,7 @@ export function deriveResortWeather(
         range: `${firstHour}–${lastHour}`,
         snowSum,
         avgTemp,
+        snowProb,
       };
     });
 
@@ -519,6 +598,7 @@ export function deriveResortWeather(
     snowDepthSource: bestDepthSource,
     past72hSnowCm,
     total24hSnowCm,
+    snowProb24h,
     maxHourlySnowCm,
     min24hTemp,
     max24hTemp,
@@ -532,5 +612,125 @@ export function deriveResortWeather(
     next24h,
     blocks,
     elevationM: Math.round(weatherData.elevation || fallbackElevation),
+  };
+}
+
+export interface SnowProbTierStyle {
+  label: string;
+  cardBgCls: string;
+  unselectedBorderCls: string;
+  blockCls: string;
+  badgeCls: string;
+  valueCls: string;
+  iconCls: string;
+}
+
+export function getSnowProbStyle(
+  prob: number | null | undefined,
+): SnowProbTierStyle {
+  if (typeof prob !== 'number' || Number.isNaN(prob)) {
+    return {
+      label: '--',
+      cardBgCls: 'bg-white/90 hover:bg-sky-50/70',
+      unselectedBorderCls: 'border-slate-200/90',
+      blockCls: 'bg-slate-50/90 border-slate-200/80',
+      badgeCls: 'bg-slate-100 text-slate-500 border-slate-200',
+      valueCls: 'text-slate-500',
+      iconCls: 'text-slate-400',
+    };
+  }
+  if (prob >= 70) {
+    return {
+      label: '高概率',
+      cardBgCls: 'bg-sky-100/95 hover:bg-sky-100',
+      unselectedBorderCls: 'border-sky-300/95',
+      blockCls: 'bg-sky-100/85 border-sky-200/90',
+      badgeCls: 'bg-sky-200/90 text-sky-950 border-sky-300/90',
+      valueCls: 'text-sky-900',
+      iconCls: 'text-sky-700',
+    };
+  }
+  if (prob >= 30) {
+    return {
+      label: '中概率',
+      cardBgCls: 'bg-amber-50/95 hover:bg-amber-100/75',
+      unselectedBorderCls: 'border-amber-200/95',
+      blockCls: 'bg-amber-50/85 border-amber-200/85',
+      badgeCls: 'bg-amber-100 text-amber-950 border-amber-300/80',
+      valueCls: 'text-amber-900',
+      iconCls: 'text-amber-700',
+    };
+  }
+  return {
+    label: '低概率',
+    cardBgCls: 'bg-slate-50/95 hover:bg-slate-100/90',
+    unselectedBorderCls: 'border-slate-200/90',
+    blockCls: 'bg-slate-50/90 border-slate-200/80',
+    badgeCls: 'bg-slate-200/75 text-slate-700 border-slate-300/70',
+    valueCls: 'text-slate-700',
+    iconCls: 'text-slate-500',
+  };
+}
+
+function haversineKm(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export function describeGpsLocationLabel(lat: number, lng: number): {
+  title: string;
+  subtitle: string;
+} {
+  let nearestResort = WEATHER_RESORTS[0];
+  let minDist = Infinity;
+  for (const resort of WEATHER_RESORTS) {
+    const dist = haversineKm(lat, lng, resort.latitude, resort.longitude);
+    if (dist < minDist) {
+      minDist = dist;
+      nearestResort = resort;
+    }
+  }
+
+  if (minDist <= 5) {
+    return {
+      title: `目前位置 · ${nearestResort.shortName}`,
+      subtitle: `GPS 實時座標（距雪場約 ${minDist.toFixed(1)} km）`,
+    };
+  }
+  if (minDist <= 40) {
+    return {
+      title: `目前位置 · 鄰近${nearestResort.shortName}`,
+      subtitle: `信州／妙高範圍（距${nearestResort.shortName}約 ${Math.round(minDist)} km）`,
+    };
+  }
+  if (lat >= 22.1 && lat <= 22.6 && lng >= 113.8 && lng <= 114.5) {
+    return {
+      title: '目前位置 · 香港',
+      subtitle: `GPS 實時氣象（${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E）`,
+    };
+  }
+  if (lat >= 35.3 && lat <= 36.1 && lng >= 139.3 && lng <= 140.6) {
+    return {
+      title: '目前位置 · 東京／千葉圈',
+      subtitle: `GPS 實時氣象（${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E）`,
+    };
+  }
+  return {
+    title: '目前 GPS 所在位置',
+    subtitle: `座標 ${lat.toFixed(3)}°N, ${lng.toFixed(3)}°E`,
   };
 }

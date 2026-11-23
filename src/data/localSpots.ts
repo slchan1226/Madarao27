@@ -71,8 +71,8 @@ export const SPOT_CATEGORY_META: Record<
     pinBorder: '#78350f',
   },
   store: {
-    label: '超商',
-    shortLabel: '超商',
+    label: '超市／7仔',
+    shortLabel: '超市・7仔',
     badgeClass: 'bg-emerald-100 text-emerald-950 border-emerald-200',
     pinBg: '#059669',
     pinBorder: '#064e3b',
