@@ -19,7 +19,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({isOnline}) => {
           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/20 text-amber-800 shrink-0">
             <WifiOff className="w-3.5 h-3.5" aria-hidden="true" />
           </span>
-          <p className="font-bold leading-snug truncate">
+          <p className="font-bold leading-snug">
             離線模式・正使用本機快取雪道圖與行程手冊
           </p>
         </div>

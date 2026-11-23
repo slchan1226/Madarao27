@@ -297,12 +297,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     >
       {/* 1. 焦點雪況與即時天氣卡（預設斑尾高原 ＋ 一鍵 GPS 定位目前位置） */}
       <div className="glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 shadow-sm border border-sky-200/80 space-y-3.5">
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="min-w-0">
-            <h2 className="font-serif text-lg sm:text-xl font-bold text-snow-900 leading-snug truncate">
+        <div className="flex flex-wrap items-start justify-between gap-2.5">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-snow-900 leading-snug">
               {activeLocationTitle}
             </h2>
-            <p className="text-[11px] text-slate-600 mt-0.5 truncate">
+            <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
               {activeLocationSubtitle}
             </p>
           </div>
@@ -385,7 +385,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 <div className="font-serif text-2xl font-bold text-snow-900 leading-none tabular-nums">
                   {activeWeather ? `${activeWeather.currentTemp}°C` : '--'}
                 </div>
-                <div className="text-[11px] text-slate-600 mt-1 truncate">
+                <div className="text-[11px] text-slate-600 mt-1 leading-snug">
                   {activeWeather ? activeWeather.currentWeather.label : '載入中'}
                 </div>
               </div>
@@ -409,7 +409,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </span>
                   <span className="text-xs font-bold text-sky-700">cm</span>
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 truncate">
+                <div className="text-[10px] text-slate-500 mt-1 leading-snug">
                   {activeWeather?.snowDepthSource ?? '多模型估算'}
                 </div>
               </div>
@@ -435,7 +435,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </span>
                   <span className="text-xs font-bold text-sky-700">cm</span>
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 truncate">
+                <div className="text-[10px] text-slate-500 mt-1 leading-snug tabular-nums">
                   {activeWeather
                     ? `${activeWeather.min24hTemp}° ～ ${activeWeather.max24hTemp}°C`
                     : '未來 24 小時'}
@@ -465,7 +465,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     %
                   </span>
                 </div>
-                <div className="text-[10px] font-bold text-slate-700 mt-1 truncate">
+                <div className="text-[10px] font-bold text-slate-700 mt-1 leading-snug">
                   {activeWeather ? `24h 最高 · ${probStyle.label}` : '--'}
                 </div>
               </div>
@@ -473,8 +473,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/70 text-[11px]">
-          <span className="text-slate-500 tabular-nums truncate">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/70 text-[11px]">
+          <span className="text-slate-500 tabular-nums">
             更新：{formatUpdatedTime(activeUpdatedAt)} JST
           </span>
           <button
@@ -496,7 +496,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           aria-label="查看去程 GK28 航班與行李詳情"
           className="w-full text-left glass-card rounded-3xl p-4 border border-sky-300/85 bg-gradient-to-br from-sky-50/90 to-white hover:border-sky-400 shadow-xs transition active:scale-[0.99] cursor-pointer space-y-2.5"
         >
-          <div className="flex items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs">
             <span className="font-bold text-sky-900">
               去程航班 · GK28（落地前提醒）
             </span>
@@ -545,7 +545,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           aria-label="查看回程 GK27 航班與行李詳情"
           className="w-full text-left glass-card rounded-3xl p-4 border border-slate-300/90 bg-gradient-to-br from-slate-50 to-white hover:border-slate-400 shadow-xs transition active:scale-[0.99] cursor-pointer space-y-2.5"
         >
-          <div className="flex items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-1.5 text-xs">
             <span className="font-bold text-slate-900">
               回程航班 · GK27（返港提醒）
             </span>
@@ -598,7 +598,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <div className="text-[10px] font-semibold text-slate-500">
               我的分車
             </div>
-            <div className="text-sm font-bold text-snow-900 truncate mt-0.5">
+            <div className="text-sm font-bold text-snow-900 leading-snug mt-0.5">
               {myCar ?? '未選擇'}
             </div>
           </div>
@@ -617,7 +617,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <div className="text-[10px] font-semibold text-slate-500">
               我的房號
             </div>
-            <div className="text-sm font-bold text-snow-900 truncate mt-0.5">
+            <div className="text-sm font-bold text-snow-900 leading-snug mt-0.5">
               {myRoom ? myRoom.split('（')[0] : '未置頂'}
             </div>
           </div>
@@ -659,10 +659,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 />
               </div>
               <div className="min-w-0">
-                <div className="text-sm font-bold text-slate-900 leading-tight truncate">
+                <div className="text-sm font-bold text-slate-900 leading-snug">
                   {item.title}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                   {item.subtitle}
                 </div>
               </div>

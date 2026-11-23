@@ -59,14 +59,14 @@ export const CountdownWidget: React.FC = () => {
             )}
           </div>
           <div className="min-w-0">
-            <div className="text-xs sm:text-sm font-bold text-snow-900 leading-tight truncate">
+            <div className="text-xs sm:text-sm font-bold text-snow-900 leading-snug">
               {isBeforeTrip
                 ? '距離 2027 斑尾出發倒數'
                 : isDuringTrip
                   ? '斑尾高原滑雪之旅進行中'
                   : '2027 斑尾滑雪團圓滿結束'}
             </div>
-            <div className="text-[11px] text-slate-600 mt-0.5 truncate">
+            <div className="text-[11px] text-slate-600 mt-0.5 leading-snug">
               {isBeforeTrip
                 ? '2027年2月14日 · HKG 01:10 GK28'
                 : isDuringTrip

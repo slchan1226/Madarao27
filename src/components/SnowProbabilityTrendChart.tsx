@@ -94,13 +94,13 @@ const SnowProbTooltip: React.FC<CustomTooltipProps> = ({active, payload}) => {
               key={series.id}
               className="flex items-center justify-between gap-3"
             >
-              <span className="inline-flex items-center gap-1.5 text-slate-700 truncate">
+              <span className="inline-flex items-center gap-1.5 text-slate-700">
                 <span
                   className="w-2.5 h-0.5 rounded-full shrink-0"
                   style={{backgroundColor: series.color}}
                   aria-hidden="true"
                 />
-                <span className="truncate">{series.shortName}</span>
+                <span>{series.shortName}</span>
               </span>
               <span className="font-bold text-slate-900 shrink-0">
                 {item.value}%
@@ -349,7 +349,7 @@ export const SnowProbabilityTrendChart: React.FC<
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
-            margin={{top: 10, right: 10, left: -20, bottom: 2}}
+            margin={{top: 10, right: 14, left: 0, bottom: 4}}
           >
             <ReferenceArea
               y1={70}
@@ -371,6 +371,7 @@ export const SnowProbabilityTrendChart: React.FC<
               axisLine={{stroke: '#cbd5e1'}}
             />
             <YAxis
+              width={36}
               domain={[0, 100]}
               ticks={[0, 30, 70, 100]}
               tickFormatter={(v: number) => `${v}%`}

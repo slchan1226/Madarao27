@@ -220,12 +220,12 @@ export const SkiLiftStatusCard: React.FC<SkiLiftStatusCardProps> = ({
       {/* 標題與即時查詢操作 */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5 text-snow-900">
+          <div className="flex items-start gap-1.5 text-snow-900">
             <CableCar
-              className="w-4 h-4 text-sky-700 shrink-0"
+              className="w-4 h-4 text-sky-700 shrink-0 mt-1"
               aria-hidden="true"
             />
-            <h3 className="font-serif text-base sm:text-lg font-bold truncate">
+            <h3 className="font-serif text-base sm:text-lg font-bold leading-snug">
               {resort.shortName}・纜車開放與營業時間
             </h3>
           </div>
@@ -331,20 +331,20 @@ export const SkiLiftStatusCard: React.FC<SkiLiftStatusCardProps> = ({
                 {liveReport.lifts.map((lift, idx) => (
                   <div
                     key={`${lift.name}-${idx}`}
-                    className="px-3 py-2 flex items-center justify-between gap-2 text-xs"
+                    className="px-3 py-2.5 flex items-start justify-between gap-2.5 text-xs"
                   >
-                    <div className="min-w-0">
-                      <p className="font-bold text-slate-900 truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-slate-900 leading-snug">
                         {lift.name}
                       </p>
                       {(lift.hours || lift.note) && (
-                        <p className="text-[11px] text-slate-500 truncate tabular-nums">
+                        <p className="text-[11px] text-slate-500 leading-snug mt-0.5 tabular-nums">
                           {[lift.hours, lift.note].filter(Boolean).join(' · ')}
                         </p>
                       )}
                     </div>
                     <span
-                      className={`text-xs shrink-0 whitespace-nowrap ${getLiftStatusTextClass(
+                      className={`text-xs shrink-0 whitespace-nowrap mt-0.5 ${getLiftStatusTextClass(
                         lift.status,
                       )}`}
                     >
@@ -378,9 +378,9 @@ export const SkiLiftStatusCard: React.FC<SkiLiftStatusCardProps> = ({
                   href={src.uri}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sky-800 hover:text-sky-950 underline underline-offset-2 inline-flex items-center gap-1 max-w-[200px]"
+                  className="text-sky-800 hover:text-sky-950 underline underline-offset-2 inline-flex items-center gap-1"
                 >
-                  <span className="truncate">{src.title}</span>
+                  <span>{src.title}</span>
                   <ExternalLink className="w-3 h-3 shrink-0" aria-hidden="true" />
                 </a>
               ))}
@@ -439,15 +439,17 @@ export const SkiLiftStatusCard: React.FC<SkiLiftStatusCardProps> = ({
             {schedule.keyLifts.map((lift) => (
               <div
                 key={lift.name}
-                className="py-2 flex items-center justify-between gap-3 text-xs"
+                className="py-2.5 flex items-start justify-between gap-3 text-xs"
               >
-                <div className="min-w-0">
-                  <p className="font-bold text-slate-900 truncate">{lift.name}</p>
-                  <p className="text-[11px] text-slate-500 truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-slate-900 leading-snug">
+                    {lift.name}
+                  </p>
+                  <p className="text-[11px] text-slate-500 leading-snug mt-0.5">
                     {lift.role}
                   </p>
                 </div>
-                <span className="text-[11px] font-semibold text-snow-900 tabular-nums shrink-0">
+                <span className="text-[11px] font-semibold text-snow-900 tabular-nums shrink-0 mt-0.5">
                   {lift.typicalHours}
                 </span>
               </div>

@@ -88,7 +88,7 @@ export const SkiMapTab: React.FC<SkiMapTabProps> = ({
               role="tab"
               aria-selected={active}
               onClick={() => setSelectedResort(tab.key)}
-              className={`min-h-[44px] px-2 py-2 rounded-xl text-xs font-bold transition cursor-pointer truncate ${
+              className={`min-h-[44px] px-1.5 sm:px-2 py-2 rounded-xl text-[11px] sm:text-xs font-bold leading-tight text-center transition cursor-pointer ${
                 active
                   ? 'bg-snow-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'

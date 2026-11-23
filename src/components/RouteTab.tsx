@@ -317,7 +317,7 @@ export const RouteTab: React.FC<RouteTabProps> = ({
               aria-hidden="true"
             />
             <div className="min-w-0">
-              <div className="text-sm font-bold text-snow-900 truncate">
+              <div className="text-sm font-bold text-snow-900 leading-snug">
                 2 月 14 日去程高速路線圖
               </div>
               <div className="text-[11px] text-slate-500">
