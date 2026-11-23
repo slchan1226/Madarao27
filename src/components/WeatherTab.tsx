@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   AlertTriangle,
   Clock,
@@ -8,6 +8,7 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
+  ExternalLink,
   Mountain,
   RefreshCw,
   ShieldCheck,
@@ -17,367 +18,28 @@ import {
   WifiOff,
   Wind,
 } from 'lucide-react';
+import {
+  WEATHER_RESORTS,
+  describeWeatherCode,
+  formatUpdatedTime,
+  type DerivedResortWeather,
+  type WeatherIconKind,
+  type WeatherMap,
+  type WeatherResortId,
+} from '../lib/weather';
 
 interface WeatherTabProps {
   isOnline: boolean;
-  onShowToast: (message: string) => void;
-}
-
-type WeatherResortId = 'madarao' | 'tangram' | 'romance' | 'nozawa';
-
-interface WeatherResortMeta {
-  id: WeatherResortId;
-  shortName: string;
-  fullName: string;
-  subLabel: string;
-  latitude: number;
-  longitude: number;
-  elevation: number;
-  elevationRange: string;
-  apiUrl: string;
-}
-
-interface OpenMeteoResponse {
-  latitude: number;
-  longitude: number;
-  elevation: number;
-  timezone: string;
-  current_units?: {
-    temperature_2m?: string;
-    apparent_temperature?: string;
-    wind_speed_10m?: string;
-    snowfall?: string;
-    snow_depth?: string;
-  };
-  current?: {
-    time: string;
-    temperature_2m: number;
-    apparent_temperature: number;
-    weather_code: number;
-    wind_speed_10m: number;
-    snowfall: number;
-    snow_depth: number | null;
-  };
-  hourly_units?: {
-    temperature_2m?: string;
-    snowfall?: string;
-    snow_depth?: string;
-    wind_speed_10m?: string;
-    precipitation_probability?: string;
-  };
-  hourly?: {
-    time: string[];
-    temperature_2m: number[];
-    snowfall: number[];
-    snow_depth: Array<number | null>;
-    weather_code: number[];
-    wind_speed_10m: number[];
-    precipitation_probability?: Array<number | null>;
-  };
-}
-
-interface ResortWeatherEntry {
-  data: OpenMeteoResponse;
-  fetchedAt: string;
-  fromCache: boolean;
-}
-
-type WeatherMap = Partial<Record<WeatherResortId, ResortWeatherEntry>>;
-
-interface HourlyForecastItem {
-  time: string;
-  hourLabel: string;
-  isTomorrow: boolean;
-  snowfallCm: number;
-  tempC: number;
-  windKmh: number;
-  weatherCode: number;
-  precipProb: number | null;
-}
-
-interface DerivedResortWeather {
-  snowDepthCm: number | null;
-  total24hSnowCm: number;
-  maxHourlySnowCm: number;
-  min24hTemp: number;
-  max24hTemp: number;
-  max24hWind: number;
-  currentTemp: number;
-  feelsLike: number;
-  windSpeed: number;
-  currentWeather: ReturnType<typeof describeWeatherCode>;
-  next24h: HourlyForecastItem[];
-  blocks: Array<{
-    label: string;
-    range: string;
-    snowSum: number;
-    avgTemp: number;
-  }>;
-  elevationM: number;
-}
-
-function buildOpenMeteoUrl(
-  latitude: number,
-  longitude: number,
-  elevation: number,
-): string {
-  return (
-    'https://api.open-meteo.com/v1/forecast' +
-    `?latitude=${latitude}` +
-    `&longitude=${longitude}` +
-    `&elevation=${elevation}` +
-    '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,snowfall,snow_depth' +
-    '&hourly=temperature_2m,snowfall,snow_depth,weather_code,wind_speed_10m,precipitation_probability' +
-    '&timezone=Asia%2FTokyo' +
-    '&forecast_days=2'
-  );
-}
-
-const WEATHER_RESORTS: WeatherResortMeta[] = [
-  {
-    id: 'madarao',
-    shortName: '斑尾高原',
-    fullName: '斑尾高原スキー場',
-    subLabel: 'Madarao Kogen',
-    latitude: 36.8475,
-    longitude: 138.2936,
-    elevation: 1150,
-    elevationRange: '海拔 910m–1,350m（中段 1,150m 基準）',
-    apiUrl: buildOpenMeteoUrl(36.8475, 138.2936, 1150),
-  },
-  {
-    id: 'tangram',
-    shortName: 'Tangram',
-    fullName: 'タングラムスキーサーカス',
-    subLabel: 'Tangram Ski Circus',
-    latitude: 36.8428,
-    longitude: 138.2738,
-    elevation: 1050,
-    elevationRange: '海拔 800m–1,320m（中段 1,050m 基準）',
-    apiUrl: buildOpenMeteoUrl(36.8428, 138.2738, 1050),
-  },
-  {
-    id: 'romance',
-    shortName: 'ロマンスの神様',
-    fullName: 'スノーリゾートロマンスの神様',
-    subLabel: '木島平 Kijimadaira',
-    latitude: 36.8355,
-    longitude: 138.4316,
-    elevation: 950,
-    elevationRange: '海拔 550m–1,351m（中段 950m 基準）',
-    apiUrl: buildOpenMeteoUrl(36.8355, 138.4316, 950),
-  },
-  {
-    id: 'nozawa',
-    shortName: '野沢温泉',
-    fullName: '野沢温泉スキー場',
-    subLabel: 'Nozawa Onsen',
-    latitude: 36.9154,
-    longitude: 138.4586,
-    elevation: 1250,
-    elevationRange: '海拔 565m–1,650m（中段 1,250m 基準）',
-    apiUrl: buildOpenMeteoUrl(36.9154, 138.4586, 1250),
-  },
-];
-
-const WEATHER_STORAGE_KEY = 'madarao_2027_weather_cache_v2';
-
-function readStoredWeatherMap(): WeatherMap {
-  try {
-    const raw = localStorage.getItem(WEATHER_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as WeatherMap;
-    if (parsed && typeof parsed === 'object') {
-      return parsed;
-    }
-  } catch {
-    // Ignore storage read errors
-  }
-  return {};
-}
-
-function saveStoredWeatherMap(map: WeatherMap): void {
-  try {
-    localStorage.setItem(WEATHER_STORAGE_KEY, JSON.stringify(map));
-  } catch {
-    // Ignore storage quota errors
-  }
-}
-
-function convertSnowDepthToCm(
-  rawDepth: number | null | undefined,
-  unit?: string,
-): number | null {
-  if (rawDepth === null || rawDepth === undefined || Number.isNaN(rawDepth)) {
-    return null;
-  }
-  if (unit === 'cm') {
-    return Math.max(0, Math.round(rawDepth));
-  }
-  // Open-Meteo returns snow_depth in meters (m) by default
-  return Math.max(0, Math.round(rawDepth * 100));
-}
-
-function formatUpdatedTime(isoString: string | null | undefined): string {
-  if (!isoString) return '尚未載入';
-  const date = new Date(isoString);
-  if (Number.isNaN(date.getTime())) return '剛才更新';
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const mins = String(date.getMinutes()).padStart(2, '0');
-  return `${month}/${day} ${hours}:${mins}`;
-}
-
-function describeWeatherCode(code: number): {
-  label: string;
-  icon:
-    | 'sun'
-    | 'partly'
-    | 'cloud'
-    | 'fog'
-    | 'rain'
-    | 'snow'
-    | 'heavy-snow'
-    | 'storm';
-} {
-  if (code === 0) return {label: '晴朗藍天', icon: 'sun'};
-  if (code === 1 || code === 2) return {label: '天晴間中多雲', icon: 'partly'};
-  if (code === 3) return {label: '陰天多雲', icon: 'cloud'};
-  if (code === 45 || code === 48) return {label: '山區有霧 / 霧凇', icon: 'fog'};
-  if (code >= 51 && code <= 67) return {label: '微雨 / 濕雪', icon: 'rain'};
-  if (code === 71 || code === 73 || code === 85) {
-    return {label: '降雪中', icon: 'snow'};
-  }
-  if (code === 75 || code === 77 || code === 86) {
-    return {label: '大雪 / 強陣雪', icon: 'heavy-snow'};
-  }
-  if (code >= 80 && code <= 82) return {label: '驟雨', icon: 'rain'};
-  if (code >= 95) return {label: '雷暴陣雪', icon: 'storm'};
-  return {label: '山區多雲', icon: 'cloud'};
-}
-
-function deriveResortWeather(
-  weatherData: OpenMeteoResponse | undefined,
-  fallbackElevation: number,
-): DerivedResortWeather | null {
-  if (!weatherData || !weatherData.hourly || !Array.isArray(weatherData.hourly.time)) {
-    return null;
-  }
-
-  const {
-    current,
-    current_units: currentUnits,
-    hourly,
-    hourly_units: hourlyUnits,
-  } = weatherData;
-
-  const currentHourPrefix = current?.time ? current.time.slice(0, 13) : '';
-  let startIdx = currentHourPrefix
-    ? hourly.time.findIndex((t) => t.startsWith(currentHourPrefix))
-    : 0;
-  if (startIdx < 0) startIdx = 0;
-
-  const currentDateStr = hourly.time[startIdx]?.slice(0, 10) ?? '';
-  const sliceEnd = Math.min(startIdx + 24, hourly.time.length);
-  const next24h: HourlyForecastItem[] = [];
-
-  for (let i = startIdx; i < sliceEnd; i++) {
-    const timeStr = hourly.time[i];
-    const datePart = timeStr.slice(0, 10);
-    const hourLabel = timeStr.slice(11, 16);
-    next24h.push({
-      time: timeStr,
-      hourLabel,
-      isTomorrow: Boolean(currentDateStr && datePart !== currentDateStr),
-      snowfallCm: Number((hourly.snowfall[i] ?? 0).toFixed(1)),
-      tempC: Math.round(hourly.temperature_2m[i] ?? 0),
-      windKmh: Math.round(hourly.wind_speed_10m[i] ?? 0),
-      weatherCode: hourly.weather_code[i] ?? 3,
-      precipProb:
-        hourly.precipitation_probability &&
-        hourly.precipitation_probability[i] !== null &&
-        hourly.precipitation_probability[i] !== undefined
-          ? Math.round(hourly.precipitation_probability[i] as number)
-          : null,
-    });
-  }
-
-  const total24hSnowCm = Number(
-    next24h.reduce((sum, item) => sum + item.snowfallCm, 0).toFixed(1),
-  );
-  const maxHourlySnowCm = Math.max(
-    ...next24h.map((item) => item.snowfallCm),
-    1,
-  );
-  const min24hTemp =
-    next24h.length > 0 ? Math.min(...next24h.map((i) => i.tempC)) : 0;
-  const max24hTemp =
-    next24h.length > 0 ? Math.max(...next24h.map((i) => i.tempC)) : 0;
-  const max24hWind =
-    next24h.length > 0 ? Math.max(...next24h.map((i) => i.windKmh)) : 0;
-
-  const snowDepthCm =
-    convertSnowDepthToCm(current?.snow_depth, currentUnits?.snow_depth) ??
-    convertSnowDepthToCm(
-      hourly.snow_depth?.[startIdx],
-      hourlyUnits?.snow_depth,
-    );
-
-  const blocks = [
-    {label: '未來 0–6h', items: next24h.slice(0, 6)},
-    {label: '未來 6–12h', items: next24h.slice(6, 12)},
-    {label: '未來 12–18h', items: next24h.slice(12, 18)},
-    {label: '未來 18–24h', items: next24h.slice(18, 24)},
-  ]
-    .filter((b) => b.items.length > 0)
-    .map((block) => {
-      const snowSum = Number(
-        block.items.reduce((acc, i) => acc + i.snowfallCm, 0).toFixed(1),
-      );
-      const avgTemp = Math.round(
-        block.items.reduce((acc, i) => acc + i.tempC, 0) / block.items.length,
-      );
-      const firstHour = block.items[0].hourLabel;
-      const lastHour = block.items[block.items.length - 1].hourLabel;
-      return {
-        label: block.label,
-        range: `${firstHour}–${lastHour}`,
-        snowSum,
-        avgTemp,
-      };
-    });
-
-  const currentTemp = Math.round(
-    current?.temperature_2m ?? next24h[0]?.tempC ?? 0,
-  );
-  const feelsLike = Math.round(current?.apparent_temperature ?? currentTemp);
-  const windSpeed = Math.round(
-    current?.wind_speed_10m ?? next24h[0]?.windKmh ?? 0,
-  );
-  const currentWeather = describeWeatherCode(
-    current?.weather_code ?? next24h[0]?.weatherCode ?? 3,
-  );
-
-  return {
-    snowDepthCm,
-    total24hSnowCm,
-    maxHourlySnowCm,
-    min24hTemp,
-    max24hTemp,
-    max24hWind,
-    currentTemp,
-    feelsLike,
-    windSpeed,
-    currentWeather,
-    next24h,
-    blocks,
-    elevationM: Math.round(weatherData.elevation || fallbackElevation),
-  };
+  weatherMap: WeatherMap;
+  derivedByResort: Partial<Record<WeatherResortId, DerivedResortWeather>>;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  errorMessage: string | null;
+  onRefresh: () => void;
 }
 
 const WeatherIcon: React.FC<{
-  kind: ReturnType<typeof describeWeatherCode>['icon'];
+  kind: WeatherIconKind;
   className?: string;
 }> = ({kind, className = 'w-5 h-5'}) => {
   switch (kind) {
@@ -417,128 +79,15 @@ const WeatherIcon: React.FC<{
 
 export const WeatherTab: React.FC<WeatherTabProps> = ({
   isOnline,
-  onShowToast,
+  weatherMap,
+  derivedByResort,
+  isLoading,
+  isRefreshing,
+  errorMessage,
+  onRefresh,
 }) => {
-  const initialMap = useMemo(() => readStoredWeatherMap(), []);
-
   const [selectedResortId, setSelectedResortId] =
     useState<WeatherResortId>('madarao');
-  const [weatherMap, setWeatherMap] = useState<WeatherMap>(initialMap);
-  const [isLoading, setIsLoading] = useState<boolean>(
-    Object.keys(initialMap).length === 0,
-  );
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const fetchAllResorts = useCallback(
-    async (manual = false) => {
-      if (manual) {
-        setIsRefreshing(true);
-      } else if (Object.keys(weatherMap).length === 0) {
-        setIsLoading(true);
-      }
-      setErrorMessage(null);
-
-      const previousMap = readStoredWeatherMap();
-      const nextMap: WeatherMap = {...previousMap};
-      let liveSuccessCount = 0;
-      let cacheHitCount = 0;
-
-      const results = await Promise.allSettled(
-        WEATHER_RESORTS.map(async (resort) => {
-          const response = await fetch(resort.apiUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          const swCacheStatus = response.headers.get('X-SW-Cache');
-          const swCachedAt = response.headers.get('X-SW-Cached-At');
-          const json = (await response.json()) as OpenMeteoResponse;
-
-          if (!json || !json.hourly || !Array.isArray(json.hourly.time)) {
-            throw new Error('INVALID_WEATHER_PAYLOAD');
-          }
-
-          const isSwCachedFallback = swCacheStatus === 'HIT' || !navigator.onLine;
-          const prevEntry = previousMap[resort.id];
-          const timestamp =
-            isSwCachedFallback && swCachedAt
-              ? swCachedAt
-              : isSwCachedFallback && prevEntry?.fetchedAt
-                ? prevEntry.fetchedAt
-                : new Date().toISOString();
-
-          return {
-            id: resort.id,
-            entry: {
-              data: json,
-              fetchedAt: timestamp,
-              fromCache: isSwCachedFallback,
-            } satisfies ResortWeatherEntry,
-          };
-        }),
-      );
-
-      results.forEach((result, index) => {
-        const resortId = WEATHER_RESORTS[index].id;
-        if (result.status === 'fulfilled') {
-          nextMap[resortId] = result.value.entry;
-          if (result.value.entry.fromCache) {
-            cacheHitCount += 1;
-          } else {
-            liveSuccessCount += 1;
-          }
-        } else if (previousMap[resortId]) {
-          nextMap[resortId] = {
-            ...previousMap[resortId]!,
-            fromCache: true,
-          };
-          cacheHitCount += 1;
-        }
-      });
-
-      const hasAnyData = Object.keys(nextMap).length > 0;
-      if (hasAnyData) {
-        setWeatherMap(nextMap);
-        saveStoredWeatherMap(nextMap);
-      } else {
-        setErrorMessage(
-          '目前處於離線狀態且尚未快取四大雪場氣象數據，請於有網絡時先載入一次。',
-        );
-      }
-
-      if (manual) {
-        if (liveSuccessCount > 0) {
-          onShowToast(`已更新 ${liveSuccessCount} 大雪場即時氣象並寫入離線快取`);
-        } else if (cacheHitCount > 0) {
-          onShowToast('目前無訊號，已載入最後一次快取的四大雪場氣象');
-        } else {
-          onShowToast('載入失敗，請檢查網絡連線');
-        }
-      }
-
-      setIsLoading(false);
-      setIsRefreshing(false);
-    },
-    [onShowToast, weatherMap],
-  );
-
-  useEffect(() => {
-    void fetchAllResorts(false);
-    // Run once on mount; manual refresh button updates all 4 resorts on demand
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const derivedByResort = useMemo(() => {
-    const map: Partial<Record<WeatherResortId, DerivedResortWeather>> = {};
-    WEATHER_RESORTS.forEach((resort) => {
-      const entry = weatherMap[resort.id];
-      const derived = deriveResortWeather(entry?.data, resort.elevation);
-      if (derived) {
-        map[resort.id] = derived;
-      }
-    });
-    return map;
-  }, [weatherMap]);
 
   const activeResort = useMemo(
     () =>
@@ -561,9 +110,9 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
       return {text: '積雪充足・全山暢滑', cls: 'bg-emerald-100 text-emerald-900'};
     }
     if (derived.snowDepthCm > 0) {
-      return {text: '雪層較薄・留意邊緣雪況', cls: 'bg-amber-100 text-amber-900'};
+      return {text: '早雪／積雪累積中', cls: 'bg-amber-100 text-amber-900'};
     }
-    return {text: '目前無積雪（非雪季）', cls: 'bg-slate-100 text-slate-600'};
+    return {text: '模型網格未達雪線・請對照官網', cls: 'bg-slate-100 text-slate-600'};
   }, [derived]);
 
   const powderTag = useMemo(() => {
@@ -627,12 +176,12 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
                 四大雪場・即時氣象
               </h2>
               {showOfflineBadge ? (
-                <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                <span className="ui-pill bg-amber-100 text-amber-950 border border-amber-300">
                   <WifiOff className="w-3 h-3 shrink-0" aria-hidden="true" />
                   <span>離線快取數據</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-950 border border-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                <span className="ui-pill bg-emerald-100 text-emerald-950 border border-emerald-300">
                   <ShieldCheck className="w-3 h-3 shrink-0" aria-hidden="true" />
                   <span>4 雪場已快取</span>
                 </span>
@@ -646,7 +195,7 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
 
           <button
             type="button"
-            onClick={() => void fetchAllResorts(true)}
+            onClick={onRefresh}
             disabled={isRefreshing}
             aria-label="重新整理四大雪場氣象"
             className="min-h-[48px] min-w-[48px] shrink-0 bg-snow-900 hover:bg-snow-700 disabled:opacity-60 text-white text-xs font-bold px-3.5 py-2.5 rounded-2xl shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer"
@@ -748,7 +297,7 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
             <h3 className="font-serif text-lg font-bold text-snow-900">
               {activeResort.fullName}
             </h3>
-            <span className="text-[11px] font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-full">
+            <span className="ui-pill text-sky-800 bg-sky-50 border border-sky-200">
               {activeResort.subLabel}
             </span>
           </div>
@@ -787,7 +336,7 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => void fetchAllResorts(true)}
+              onClick={onRefresh}
               className="min-h-[48px] w-full bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl px-4 py-2.5 transition cursor-pointer"
             >
               重新嘗試載入
@@ -802,7 +351,7 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
               {/* 積雪深度 */}
               <div className="bg-gradient-to-br from-sky-50 to-white border border-sky-200 rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between shadow-xs">
                 <div className="flex items-center justify-between gap-1 text-sky-900">
-                  <span className="text-xs font-bold">目前積雪深度</span>
+                  <span className="text-xs font-bold">積雪深度（估算）</span>
                   <Snowflake
                     className="w-4 h-4 text-sky-600 shrink-0"
                     aria-hidden="true"
@@ -810,10 +359,16 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
                 </div>
                 <div className="my-2">
                   <div className="flex items-baseline gap-1">
-                    <span className="font-serif text-3xl sm:text-4xl font-bold text-snow-900 tracking-tight">
+                    <span className="font-serif text-3xl sm:text-4xl font-bold text-snow-900 tracking-tight tabular-nums">
                       {derived.snowDepthCm !== null ? derived.snowDepthCm : '--'}
                     </span>
                     <span className="text-sm font-bold text-sky-700">cm</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">
+                    來源：{derived.snowDepthSource}
+                    {derived.past72hSnowCm > 0
+                      ? ` · 近72h降雪 +${derived.past72hSnowCm}cm`
+                      : ''}
                   </div>
                 </div>
                 <span
@@ -834,7 +389,7 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
                 </div>
                 <div className="my-2">
                   <div className="flex items-baseline gap-1">
-                    <span className="font-serif text-3xl sm:text-4xl font-bold tracking-tight">
+                    <span className="font-serif text-3xl sm:text-4xl font-bold tracking-tight tabular-nums">
                       {derived.total24hSnowCm > 0
                         ? `+${derived.total24hSnowCm}`
                         : '0'}
@@ -892,6 +447,18 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
                 </span>
               </div>
             </div>
+
+            {/* 直達雪場官網實測積雪報告按鈕 */}
+            <a
+              href={activeResort.officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`前往 ${activeResort.fullName} 官網查看官方實測積雪與纜車狀況`}
+              className="min-h-[48px] w-full bg-sky-50 hover:bg-sky-100 text-snow-900 border border-sky-200 text-xs font-bold py-2.5 px-3.5 rounded-2xl inline-flex items-center justify-center gap-1.5 transition"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-sky-700 shrink-0" aria-hidden="true" />
+              <span>對照 {activeResort.shortName} 官網實測積雪 &amp; 纜車開放</span>
+            </a>
           </>
         )}
       </div>
@@ -1064,9 +631,11 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
               aria-hidden="true"
             />
             <p>
-              <strong>四大雪場山頂離線保護：</strong>每次更新均會透過{' '}
-              <span className="font-semibold text-slate-800">Open-Meteo</span>{' '}
-              同步抓取斑尾高原、Tangram、ロマンスの神様及野沢温泉數據並寫入 Service Worker 快取，上到山頂無訊號仍可自由切換四個雪場的最後快取數據。
+              <strong>多模型積雪與山頂離線快取：</strong>為解決日本 JMA 開放模型不含地面積雪欄位的問題，本頁同步整合{' '}
+              <span className="font-semibold text-slate-800">
+                ECMWF IFS、NOAA GFS、DWD ICON 及 JMA
+              </span>{' '}
+              多模型估算，並全部寫入 Service Worker 離線快取；由於衛星／數值網格（約 9–13km）與雪道人工造雪／山頂雪尺仍有差異，建議出門前可一鍵對照上方官網實測數字。
             </p>
           </div>
         </div>

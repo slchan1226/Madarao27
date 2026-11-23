@@ -7,14 +7,15 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Bed,
   Car,
+  ChevronRight,
   CloudSnow,
   HelpCircle,
   MountainSnow,
-  PlaneLanding,
   PlaneTakeoff,
   Route,
   Smartphone,
-  Wifi,
+  Snowflake,
+  Thermometer,
 } from 'lucide-react';
 import {CountdownWidget} from './components/CountdownWidget';
 import {FlightTab} from './components/FlightTab';
@@ -29,6 +30,7 @@ import {SkiMapTab} from './components/SkiMapTab';
 import {WeatherTab} from './components/WeatherTab';
 import {useOnlineStatus} from './hooks/useOnlineStatus';
 import {usePWAInstall} from './hooks/usePWAInstall';
+import {useSkiWeather} from './hooks/useSkiWeather';
 import type {CarId, MapMode, ResortKey, TabId} from './types/trip';
 
 const STORAGE_KEYS = {
@@ -111,6 +113,9 @@ export default function App() {
       setToastVisible(false);
     }, 2200);
   }, []);
+
+  const skiWeather = useSkiWeather(showToast);
+  const madaraoWeather = skiWeather.derivedByResort.madarao ?? null;
 
   useEffect(() => {
     return () => {
@@ -351,7 +356,7 @@ export default function App() {
         </div>
 
         <svg
-          className="absolute bottom-0 left-0 w-full h-24 pointer-events-none"
+          className="absolute bottom-0 left-0 w-full h-14 pointer-events-none"
           viewBox="0 0 1440 220"
           preserveAspectRatio="none"
           aria-hidden="true"
@@ -370,16 +375,16 @@ export default function App() {
           />
         </svg>
 
-        <div className="relative w-full max-w-xl mx-auto px-4 sm:px-5 pb-12">
-          <div className="flex items-center justify-between gap-2 mb-3.5">
-            <div className="min-w-0 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-md px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium border border-white/25 shadow-sm">
+        <div className="relative w-full max-w-xl mx-auto px-3.5 sm:px-5 pb-7">
+          <div className="flex items-center justify-between gap-1.5 mb-2.5">
+            <div className="ui-pill-header min-w-0 bg-white/15 backdrop-blur-md text-white border border-white/25 shadow-sm">
               <img
                 id="header-app-icon"
                 src="./icon-192.png"
                 alt="App Icon"
                 className="w-4 h-4 rounded-sm shrink-0 object-cover"
               />
-              <span className="truncate">2027.02.14–20 ｜ 14人團</span>
+              <span className="truncate">2027.02.14–20 · 14人團</span>
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
@@ -388,7 +393,7 @@ export default function App() {
                 id="header-guide-btn"
                 onClick={() => setGuideModalOpen(true)}
                 aria-label="打開手冊使用說明"
-                className="min-h-[48px] min-w-[48px] shrink-0 whitespace-nowrap bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-bold px-3 py-2 rounded-full border border-white/25 transition inline-flex items-center justify-center gap-1 cursor-pointer"
+                className="ui-pill-header shrink-0 bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/25 transition cursor-pointer"
               >
                 <HelpCircle
                   className="w-3.5 h-3.5 text-sky-200 shrink-0"
@@ -404,14 +409,14 @@ export default function App() {
                   id="header-install-btn"
                   onClick={handleInstallAction}
                   aria-label="將應用程式加到主畫面"
-                  className="min-h-[48px] min-w-[48px] shrink-0 whitespace-nowrap bg-white/20 hover:bg-white/30 active:scale-95 text-white text-xs font-bold px-3 sm:px-3.5 py-2 rounded-full border border-white/30 transition inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="ui-pill-header shrink-0 bg-white/20 hover:bg-white/30 active:scale-95 text-white border border-white/30 transition cursor-pointer"
                 >
                   <Smartphone
                     className="w-3.5 h-3.5 text-sky-200 shrink-0"
                     aria-hidden="true"
                   />
                   <span id="header-install-text" className="hidden sm:inline">
-                    {canNativeInstall ? '一鍵安裝 App' : '加到主畫面'}
+                    {canNativeInstall ? '一鍵安裝' : '加到主畫面'}
                   </span>
                   <span className="sm:hidden">
                     {canNativeInstall ? '安裝' : '主畫面'}
@@ -429,6 +434,44 @@ export default function App() {
               <p className="text-sky-200 fluid-subtitle font-sans font-semibold mt-0.5 leading-snug">
                 Madarao Kogen Snowboard Trip
               </p>
+
+              {/* 斑尾高原即時氣溫與積雪深度（統一膠囊大小，點擊直達雪場氣象分頁） */}
+              <button
+                type="button"
+                onClick={() => switchTab('weather')}
+                aria-label="查看斑尾高原及四大雪場詳細氣象"
+                className="ui-pill-header mt-2 max-w-full bg-white/15 hover:bg-white/25 active:scale-[0.98] backdrop-blur-md border border-white/25 text-white shadow-sm transition cursor-pointer"
+              >
+                <span className="inline-flex items-center gap-1">
+                  <Thermometer
+                    className="w-3.5 h-3.5 text-amber-300 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    斑尾{' '}
+                    {madaraoWeather ? `${madaraoWeather.currentTemp}°C` : '--°C'}
+                  </span>
+                </span>
+                <span className="text-white/40" aria-hidden="true">
+                  ｜
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Snowflake
+                    className="w-3.5 h-3.5 text-sky-200 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    積雪{' '}
+                    {madaraoWeather && madaraoWeather.snowDepthCm !== null
+                      ? `${madaraoWeather.snowDepthCm} cm`
+                      : '-- cm'}
+                  </span>
+                </span>
+                <ChevronRight
+                  className="w-3.5 h-3.5 text-sky-200 shrink-0"
+                  aria-hidden="true"
+                />
+              </button>
             </div>
             <div className="shrink-0 flex items-center gap-1.5 opacity-90 pointer-events-none select-none pt-0.5">
               <div className="border border-rose-300/70 bg-rose-600/25 text-rose-100 text-[10px] font-serif px-1.5 py-0.5 rounded tracking-widest leading-tight text-center">
@@ -444,30 +487,6 @@ export default function App() {
                 信州斑尾
               </div>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-1.5 text-[11px] text-sky-100">
-            <span className="whitespace-nowrap bg-snow-900/50 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/15 inline-flex items-center gap-1">
-              <PlaneLanding
-                className="w-3.5 h-3.5 text-sky-300 shrink-0"
-                aria-hidden="true"
-              />
-              <span>去程 09:30 成田出發</span>
-            </span>
-            <span className="whitespace-nowrap bg-snow-900/50 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/15 inline-flex items-center gap-1">
-              <MountainSnow
-                className="w-3.5 h-3.5 text-sky-300 shrink-0"
-                aria-hidden="true"
-              />
-              <span>4 大雪場中高級攻略</span>
-            </span>
-            <span className="whitespace-nowrap bg-snow-900/50 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/15 inline-flex items-center gap-1">
-              <Wifi
-                className="w-3.5 h-3.5 text-emerald-300 shrink-0"
-                aria-hidden="true"
-              />
-              <span>支援離線查閱</span>
-            </span>
           </div>
         </div>
       </header>
@@ -504,7 +523,15 @@ export default function App() {
             />
           )}
           {activeTab === 'weather' && (
-            <WeatherTab isOnline={isOnline} onShowToast={showToast} />
+            <WeatherTab
+              isOnline={isOnline}
+              weatherMap={skiWeather.weatherMap}
+              derivedByResort={skiWeather.derivedByResort}
+              isLoading={skiWeather.isLoading}
+              isRefreshing={skiWeather.isRefreshing}
+              errorMessage={skiWeather.errorMessage}
+              onRefresh={() => void skiWeather.refreshAll(true)}
+            />
           )}
           {activeTab === 'local' && <LocalTab />}
         </main>

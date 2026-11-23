@@ -181,13 +181,11 @@ export const HotelTab: React.FC<HotelTabProps> = ({
                     room.striped ? 'bg-slate-50/70' : 'bg-white'
                   }`}
                 >
-                  <div>
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-bold text-snow-900 text-sm">
                       {room.label}
                     </span>
-                    <span
-                      className={`ml-2 px-2 py-0.5 rounded-full font-medium ${room.badgeClass}`}
-                    >
+                    <span className={`ui-pill ${room.badgeClass}`}>
                       {room.badge}
                     </span>
                   </div>

@@ -96,10 +96,10 @@ export const SkiMapTab: React.FC<SkiMapTabProps> = ({
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex flex-wrap gap-1.5 mb-1.5">
-              <span className="text-[11px] font-bold bg-sky-700 text-white px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill bg-sky-700 text-white">
                 主場雙山共通
               </span>
-              <span className="text-[11px] font-bold bg-purple-100 text-purple-900 px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill bg-purple-100 text-purple-900">
                 海拔 1,381m 斑尾山
               </span>
             </div>
@@ -197,10 +197,10 @@ export const SkiMapTab: React.FC<SkiMapTabProps> = ({
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex flex-wrap gap-1.5 mb-1.5">
-              <span className="text-[11px] font-bold bg-rose-700 text-white px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill bg-rose-700 text-white">
                 高社山 1,351m
               </span>
-              <span className="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill bg-amber-100 text-amber-900">
                 40度非壓雪陡坡 · 350m 斜壁道
               </span>
             </div>
@@ -292,10 +292,10 @@ export const SkiMapTab: React.FC<SkiMapTabProps> = ({
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex flex-wrap gap-1.5 mb-1.5">
-              <span className="text-[11px] font-bold bg-snow-900 text-white px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill bg-snow-900 text-white">
                 毛無山 1,650m
               </span>
-              <span className="text-[11px] font-bold bg-sky-100 text-sky-900 px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill bg-sky-100 text-sky-900">
                 垂直落差 1,085m · 3.5km 山脊紅線
               </span>
             </div>

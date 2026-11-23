@@ -1,5 +1,5 @@
 import React from 'react';
-import {ArrowRight, Luggage, Plane} from 'lucide-react';
+import {ArrowRight, ExternalLink, Luggage, Plane} from 'lucide-react';
 import type {TabId} from '../types/trip';
 
 interface FlightTabProps {
@@ -31,10 +31,10 @@ export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
         <div className="bg-sky-50/85 border border-sky-200 rounded-2xl p-3.5 sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="shrink-0 whitespace-nowrap text-[11px] font-bold text-white bg-sky-700 px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill text-white bg-sky-700">
                 去程 OUTBOUND
               </span>
-              <span className="text-[11px] font-bold text-sky-800 bg-white/80 border border-sky-200 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="ui-pill text-sky-800 bg-white/85 border border-sky-200">
                 A320
               </span>
             </div>
@@ -88,10 +88,10 @@ export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="shrink-0 whitespace-nowrap text-[11px] font-bold text-white bg-slate-800 px-2.5 py-0.5 rounded-full">
+              <span className="ui-pill text-white bg-slate-800">
                 回程 INBOUND
               </span>
-              <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="ui-pill text-slate-700 bg-white border border-slate-200">
                 A320
               </span>
             </div>
@@ -165,6 +165,19 @@ export const FlightTab: React.FC<FlightTabProps> = ({onNavigateTab}) => {
             <li>
               去程香港 T1 櫃檯於起飛前 <strong>60 分鐘</strong>
               停止辦理登機及寄艙。
+            </li>
+            <li>
+              入境日本前請預先填妥電子申報並準備 QR Code：
+              <a
+                href="https://www.vjw.digital.go.jp/main/#/vjwplo001"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="開啟 Visit Japan Web 入境申報網站"
+                className="ui-pill ml-1 mt-1 bg-amber-200/80 hover:bg-amber-300/80 text-amber-950 border border-amber-300 transition"
+              >
+                <span>Visit Japan Web</span>
+                <ExternalLink className="w-3 h-3 shrink-0" aria-hidden="true" />
+              </a>
             </li>
           </ul>
         </div>

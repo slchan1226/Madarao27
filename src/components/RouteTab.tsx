@@ -40,7 +40,7 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </span>
           <span
             id="selected-car-badge"
-            className="text-[11px] font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full shrink-0"
+            className="ui-pill text-sky-800 bg-sky-100"
           >
             {myCar ? `已選：${myCar}` : '未選擇'}
           </span>
@@ -83,7 +83,7 @@ export const RouteTab: React.FC<RouteTabProps> = ({
               2月14日去程自駕路線圖
             </h2>
           </div>
-          <span className="shrink-0 whitespace-nowrap text-xs font-bold bg-sky-100/90 text-sky-900 px-3 py-1 rounded-full border border-sky-200/70">
+          <span className="ui-pill bg-sky-100/90 text-sky-900 border border-sky-200/70">
             全程約 7.5 小時
           </span>
         </div>
@@ -118,8 +118,8 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </div>
           <span className="absolute -left-[33px] top-6 w-4 h-4 rounded-full bg-sky-600 ring-4 ring-white shadow" />
           <div className="relative">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className="ui-pill text-sky-800 bg-sky-100">
                 起點 · 09:30 開車出發
               </span>
               <span className="text-xs font-medium text-slate-600">
@@ -165,8 +165,8 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </div>
           <span className="absolute -left-[33px] top-6 w-4 h-4 rounded-full bg-sky-500 ring-4 ring-white shadow" />
           <div className="relative">
-            <div className="flex flex-wrap items-center justify-between gap-1">
-              <span className="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className="ui-pill text-sky-800 bg-sky-100">
                 第 1 站 · 10:55 – 11:25 (停30分)
               </span>
               <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1">
@@ -208,8 +208,8 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </div>
           <span className="absolute -left-[34px] top-6 w-4 h-4 rounded-full bg-amber-500 ring-4 ring-white shadow" />
           <div className="relative">
-            <div className="flex flex-wrap items-center justify-between gap-1">
-              <span className="text-xs font-bold text-amber-950 bg-amber-100 px-2.5 py-0.5 rounded-full">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className="ui-pill text-amber-950 bg-amber-100">
                 ★ 第 2 站 · 12:30 – 14:15 (停1h45m)
               </span>
               <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1">
@@ -263,8 +263,8 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </div>
           <span className="absolute -left-[33px] top-6 w-4 h-4 rounded-full bg-sky-500 ring-4 ring-white shadow" />
           <div className="relative">
-            <div className="flex flex-wrap items-center justify-between gap-1">
-              <span className="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className="ui-pill text-sky-800 bg-sky-100">
                 第 3 站 · 15:55 – 16:25 (停30分)
               </span>
               <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1">
@@ -306,8 +306,8 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </div>
           <span className="absolute -left-[34px] top-6 w-4 h-4 rounded-full bg-snow-900 ring-4 ring-white shadow" />
           <div className="relative">
-            <div className="flex flex-wrap items-center justify-between gap-1">
-              <span className="text-xs font-bold text-white bg-snow-900 px-2.5 py-0.5 rounded-full">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className="ui-pill text-white bg-snow-900">
                 終點 · 預計 17:00 – 17:15 抵達
               </span>
               <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1">
