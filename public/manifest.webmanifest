@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "2027 斑尾高原滑雪團・自駕行程手冊",
+  "short_name": "斑尾滑雪27",
+  "description": "2027年2月14–20日 14人日本斑尾高原滑雪團自駕路線、酒店房號與四大雪場離線雪道手冊",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eff6ff",
+  "theme_color": "#0f294a",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

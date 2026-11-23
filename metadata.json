@@ -1,0 +1,6 @@
+{
+  "name": "2027 斑尾高原滑雪團・自駕行程手冊",
+  "description": "2027年2月14–20日 14人日本斑尾高原滑雪團自駕路線、酒店房號與四大雪場離線雪道手冊",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

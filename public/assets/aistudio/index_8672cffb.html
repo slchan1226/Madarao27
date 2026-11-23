@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f294a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="斑尾滑雪27" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>2027 斑尾高原滑雪團｜自駕路線與行程手冊</title>
+  <!-- 指向同目錄實體 Manifest 與 PNG Icon（通過 Chrome 原生 WebAPK 安裝驗證） -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+  <link id="apple-touch-icon" rel="apple-touch-icon" sizes="180x180" href="./icon-512.png" />
+
+  <!-- 引入日系與繁體中文質感字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 圖示 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', '"Noto Sans JP"', 'sans-serif'],
+            serif: ['"Shippori Mincho"', 'serif'],
+          },
+          colors: {
+            snow: {
+              50: '#f8fbff',
+              100: '#eef6ff',
+              200: '#d9ebff',
+              300: '#b8daff',
+              500: '#3b82f6',
+              700: '#1d4ed8',
+              800: '#1e3a8a',
+              900: '#0f294a',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    html {
+      height: auto;
+      min-height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: clip;
+      overflow-y: visible;
+      touch-action: pan-y;
+      background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 30%, #f1f5f9 100%);
+      color: #1e293b;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+    }
+
+    .safe-top-header {
+      padding-top: calc(3.25rem + env(safe-area-inset-top));
+    }
+    @media (display-mode: standalone) {
+      .safe-top-header {
+        padding-top: calc(1.25rem + env(safe-area-inset-top));
+      }
+    }
+
+    .fluid-title {
+      font-size: clamp(1.35rem, 6vw, 1.85rem);
+      line-height: 1.25;
+    }
+    .fluid-subtitle {
+      font-size: clamp(0.9rem, 4vw, 1.15rem);
+    }
+    .fluid-time {
+      font-size: clamp(1.35rem, 5.8vw, 1.65rem);
+    }
+
+    .safe-bottom-nav {
+      padding-bottom: calc(0.45rem + env(safe-area-inset-bottom));
+    }
+
+    .jp-pattern-subtle {
+      background-color: #ffffff;
+      background-image:
+        radial-gradient(circle at 100% 150%, #ffffff 24%, #f1f5f9 25%, #f1f5f9 28%, #ffffff 29%, #ffffff 36%, #f1f5f9 36%, #f1f5f9 40%, transparent 40%, transparent),
+        radial-gradient(circle at 0 150%, #ffffff 24%, #f1f5f9 25%, #f1f5f9 28%, #ffffff 29%, #ffffff 36%, #f1f5f9 36%, #f1f5f9 40%, transparent 40%, transparent),
+        radial-gradient(circle at 50% 100%, #f1f5f9 10%, #ffffff 11%, #ffffff 23%, #f1f5f9 24%, #f1f5f9 30%, #ffffff 31%, #ffffff 43%, #f1f5f9 44%, #f1f5f9 50%, #ffffff 51%, #ffffff 63%, #f1f5f9 64%, #f1f5f9 71%, transparent 71%, transparent);
+      background-size: 44px 22px;
+    }
+
+    @keyframes snowfall {
+      0% { transform: translateY(-10px) translateX(0); opacity: 0; }
+      20% { opacity: 0.85; }
+      80% { opacity: 0.85; }
+      100% { transform: translateY(230px) translateX(18px); opacity: 0; }
+    }
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 11px;
+      pointer-events: none;
+      animation: snowfall linear infinite;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 25px -5px rgba(15, 41, 74, 0.05), 0 4px 10px -2px rgba(15, 41, 74, 0.03);
+    }
+
+    .nav-btn {
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .nav-btn:active {
+      transform: scale(0.97);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-sky-200 selection:text-sky-900">
+
+  <!-- 頂部日系雪山主題橫幅 -->
+  <header class="relative overflow-hidden bg-gradient-to-br from-snow-900 via-[#153e75] to-sky-700 text-white shadow-lg safe-top-header">
+    <div aria-hidden="true" class="inset-0 absolute overflow-hidden pointer-events-none">
+      <span class="snowflake" style="left: 8%; animation-duration: 7s; animation-delay: 0s;">❄</span>
+      <span class="snowflake" style="left: 22%; animation-duration: 9s; animation-delay: 2s; font-size: 8px;">•</span>
+      <span class="snowflake" style="left: 38%; animation-duration: 6.5s; animation-delay: 1s;">❄</span>
+      <span class="snowflake" style="left: 55%; animation-duration: 8.5s; animation-delay: 3s; font-size: 9px;">•</span>
+      <span class="snowflake" style="left: 72%; animation-duration: 7.5s; animation-delay: 0.5s;">❄</span>
+      <span class="snowflake" style="left: 89%; animation-duration: 9.5s; animation-delay: 1.5s; font-size: 8px;">•</span>
+    </div>
+
+    <svg class="absolute bottom-0 left-0 w-full h-24 pointer-events-none" viewBox="0 0 1440 220" preserveAspectRatio="none">
+      <path fill="rgba(186, 230, 253, 0.16)" d="M0,160 L180,75 L340,145 L560,45 L790,155 L1020,55 L1240,135 L1440,65 L1440,220 L0,220 Z"></path>
+      <path fill="rgba(224, 242, 254, 0.25)" d="M0,185 L240,105 L460,175 L690,85 L940,165 L1180,95 L1440,160 L1440,220 L0,220 Z"></path>
+      <path fill="#eff6ff" d="M0,200 L140,168 L290,192 L490,152 L680,196 L910,158 L1130,190 L1320,162 L1440,185 L1440,220 L0,220 Z"></path>
+    </svg>
+
+    <div class="relative w-full max-w-xl mx-auto px-4 sm:px-5 pb-12">
+      <div class="flex items-center justify-between gap-2 mb-3.5">
+        <div class="min-w-0 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium border border-white/25 shadow-sm">
+          <img id="header-app-icon" src="./icon.svg" alt="App Icon" class="w-4 h-4 rounded-sm shrink-0" />
+          <span class="truncate">2027.02.14–20 ｜ 14人團手冊</span>
+        </div>
+        <button id="header-install-btn" onclick="handleInstallAction()" aria-label="將應用程式加到主畫面" class="min-h-[48px] min-w-[48px] shrink-0 whitespace-nowrap bg-white/20 hover:bg-white/30 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-full border border-white/30 transition inline-flex items-center gap-1.5">
+          <i id="header-install-icon" class="fa-solid fa-mobile-screen-button text-sky-200"></i>
+          <span id="header-install-text">加到主畫面</span>
+        </button>
+      </div>
+
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <h1 class="font-serif fluid-title font-bold tracking-wide drop-shadow-sm">
+            斑尾高原滑雪之旅
+          </h1>
+          <p class="text-sky-200 fluid-subtitle font-sans font-semibold mt-0.5 truncate">
+            Madarao Kogen Snowboard Trip
+          </p>
+        </div>
+        <div class="shrink-0 flex items-center gap-1.5 opacity-90 pointer-events-none select-none pt-0.5">
+          <div class="border border-rose-300/70 bg-rose-600/25 text-rose-100 text-[10px] font-serif px-1.5 py-0.5 rounded tracking-widest leading-tight text-center">
+            雪<br>見<br>旅
+          </div>
+          <div class="text-[10px] font-serif tracking-[0.2em] text-sky-200/85 leading-snug" style="writing-mode: vertical-rl;">
+            信州斑尾
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-1.5 text-[11px] text-sky-100">
+        <span class="whitespace-nowrap bg-snow-900/50 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/15">
+          <i class="fa-solid fa-plane-arrival mr-1 text-sky-300"></i>去程 09:30 成田出發
+        </span>
+        <span class="whitespace-nowrap bg-snow-900/50 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/15">
+          <i class="fa-solid fa-person-skiing mr-1 text-sky-300"></i>4 大雪場中高級攻略
+        </span>
+        <span class="whitespace-nowrap bg-snow-900/50 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-white/15">
+          <i class="fa-solid fa-wifi mr-1 text-emerald-300"></i>支援離線查閱
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="w-full max-w-xl mx-auto px-3.5 sm:px-4 pt-4 space-y-6">
+
+    <!-- ==================== 分頁 1：航班資料（預設首頁） ==================== -->
+    <section id="panel-flight" role="tabpanel" aria-labelledby="tab-flight" class="space-y-4">
+      <div class="glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div>
+          <span class="text-[11px] font-bold tracking-widest text-sky-700 uppercase">STEP 1 · FLIGHT SCHEDULE</span>
+          <h2 class="font-serif text-lg sm:text-xl font-bold text-slate-900 mt-0.5">捷星日本 Jetstar Japan 航班資訊</h2>
+          <p class="text-xs text-slate-600 mt-1">請於起飛前至少 2.5 小時到達機場辦理大件雪具寄艙手續</p>
+        </div>
+
+        <!-- 去程航班 -->
+        <div class="bg-sky-50/85 border border-sky-200 rounded-2xl p-3.5 sm:p-4">
+          <div class="flex items-center justify-between gap-2">
+            <span class="shrink-0 whitespace-nowrap text-[11px] font-bold text-white bg-sky-700 px-2.5 py-0.5 rounded-full">去程 OUTBOUND</span>
+            <span class="text-xs font-bold text-sky-900 text-right">2027年2月14日 (日)</span>
+          </div>
+          <div class="grid grid-cols-[auto_1fr_auto] items-center gap-2 mt-3.5">
+            <div>
+              <div class="fluid-time font-bold text-slate-900 leading-none">01:10</div>
+              <div class="text-xs font-bold text-slate-700 mt-1 whitespace-nowrap">香港 HKG · T1</div>
+            </div>
+            <div class="px-1.5 text-center min-w-0">
+              <div class="text-xs font-bold text-sky-800 whitespace-nowrap">GK28 (A320)</div>
+              <div class="border-t-2 border-dashed border-sky-300 my-1.5 relative">
+                <i class="fa-solid fa-plane text-sky-700 text-xs bg-sky-50 px-1 -top-2 relative"></i>
+              </div>
+              <div class="text-[11px] font-medium text-slate-600 whitespace-nowrap">飛行 4h 10m</div>
+            </div>
+            <div class="text-right">
+              <div class="fluid-time font-bold text-slate-900 leading-none">06:20</div>
+              <div class="text-xs font-bold text-slate-700 mt-1 whitespace-nowrap">東京成田 NRT · T3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 回程航班 -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4">
+          <div class="flex items-center justify-between gap-2">
+            <span class="shrink-0 whitespace-nowrap text-[11px] font-bold text-white bg-slate-800 px-2.5 py-0.5 rounded-full">回程 INBOUND</span>
+            <span class="text-xs font-bold text-slate-800 text-right">2027年2月20日 (六)</span>
+          </div>
+          <div class="grid grid-cols-[auto_1fr_auto] items-center gap-2 mt-3.5">
+            <div>
+              <div class="fluid-time font-bold text-slate-900 leading-none">19:30</div>
+              <div class="text-xs font-bold text-slate-700 mt-1 whitespace-nowrap">東京成田 NRT · T3</div>
+            </div>
+            <div class="px-1.5 text-center min-w-0">
+              <div class="text-xs font-bold text-slate-800 whitespace-nowrap">GK27 (A320)</div>
+              <div class="border-t-2 border-dashed border-slate-300 my-1.5 relative">
+                <i class="fa-solid fa-plane text-slate-700 text-xs bg-slate-50 px-1 -top-2 relative"></i>
+              </div>
+              <div class="text-[11px] font-medium text-slate-600 whitespace-nowrap">飛行 5h 15m</div>
+            </div>
+            <div class="text-right">
+              <div class="fluid-time font-bold text-slate-900 leading-none">23:45</div>
+              <div class="text-xs font-bold text-slate-700 mt-1 whitespace-nowrap">香港 HKG · T1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 訂單與行李備忘 -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-950 space-y-1.5">
+          <p class="font-bold"><i class="fa-solid fa-suitcase-rolling mr-1.5"></i>行李與登機備忘：</p>
+          <ul class="list-disc pl-4 space-y-1 text-amber-900">
+            <li>訂位代號參考：<strong>TUKQQH</strong>（9人訂單）、<strong>VLNWFF</strong>（3人訂單）及同團其餘訂單。</li>
+            <li>每人手提行李限重 <strong>7kg</strong>（1件登機箱＋1件隨身小包）；寄艙行李按各自機票為 <strong>25kg–30kg</strong>（單件不可超過 32kg）。</li>
+            <li>去程香港 T1 櫃檯於起飛前 <strong>60 分鐘</strong>停止辦理登機及寄艙。</li>
+          </ul>
+        </div>
+
+        <button onclick="switchTab('route')" aria-label="前往去程自駕路線分頁" class="min-h-[48px] w-full py-3.5 px-4 rounded-2xl bg-snow-700 hover:bg-snow-900 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition shadow-sm active:scale-[0.98]">
+          <span>落機後下一步：查看成田 ➔ 斑尾自駕路線</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 2：自駕路線與即時導航 ==================== -->
+    <section id="panel-route" role="tabpanel" aria-labelledby="tab-route" class="hidden space-y-6">
+
+      <!-- 我的分車快速記憶卡 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-car text-sky-700 mr-1.5"></i>我的分車編排（自動儲存於本機）</span>
+          <span id="selected-car-badge" class="text-[11px] font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">未選擇</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2" role="group" aria-label="選擇我的車輛">
+          <button onclick="selectMyCar('Car A')" id="car-btn-Car A" aria-label="標記為 Car A 乘客" class="car-select-btn min-h-[48px] rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-bold transition">Car A</button>
+          <button onclick="selectMyCar('Car B')" id="car-btn-Car B" aria-label="標記為 Car B 乘客" class="car-select-btn min-h-[48px] rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-bold transition">Car B</button>
+          <button onclick="selectMyCar('Car C')" id="car-btn-Car C" aria-label="標記為 Car C 乘客" class="car-select-btn min-h-[48px] rounded-2xl border border-slate-200 bg-white text-slate-700 text-xs font-bold transition">Car C</button>
+        </div>
+      </div>
+
+      <!-- 路線總覽卡片 + 日系 SVG 路線地圖 -->
+      <div class="glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="min-w-0">
+            <span class="text-[11px] font-bold tracking-widest text-sky-700 uppercase">STEP 2 · HIGHWAY ROUTE</span>
+            <h2 class="font-serif text-lg font-bold text-slate-900">2月14日去程自駕路線圖</h2>
+          </div>
+          <span class="shrink-0 whitespace-nowrap text-xs font-bold bg-sky-100/90 text-sky-900 px-3 py-1 rounded-full border border-sky-200/70">
+            全程約 7.5 小時
+          </span>
+        </div>
+
+        <div class="bg-gradient-to-b from-sky-100/70 via-sky-50/40 to-white rounded-2xl p-3.5 border border-sky-100 shadow-inner">
+          <svg viewBox="0 0 360 280" class="w-full h-auto select-none">
+            <defs>
+              <linearGradient id="roadGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0284c7" />
+                <stop offset="50%" stop-color="#2563eb" />
+                <stop offset="100%" stop-color="#0f294a" />
+              </linearGradient>
+              <filter id="nodeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f294a" flood-opacity="0.18"/>
+              </filter>
+            </defs>
+
+            <path d="M-10,235 Q95,215 180,245 T370,225" fill="none" stroke="#bae6fd" stroke-width="1" stroke-dasharray="3 3" opacity="0.7" />
+            <path d="M-10,165 Q110,145 210,175 T370,150" fill="none" stroke="#bae6fd" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
+            <path d="M235,68 L268,26 L298,64 L322,36 L348,68 Z" fill="#dbeafe" opacity="0.8" />
+            <path d="M268,26 L258,39 L268,35 L278,39 Z" fill="#ffffff" />
+            <path d="M322,36 L314,46 L322,43 L330,46 Z" fill="#ffffff" />
+
+            <g transform="translate(322, 232)" opacity="0.55">
+              <circle cx="0" cy="0" r="14" fill="none" stroke="#64748b" stroke-width="1" />
+              <polygon points="0,-10 3,0 0,-3 -3,0" fill="#dc2626" />
+              <polygon points="0,10 3,0 0,3 -3,0" fill="#64748b" />
+              <text x="0" y="-16" text-anchor="middle" font-size="7" font-weight="bold" fill="#475569">N</text>
+            </g>
+
+            <path d="M 48 232 C 100 232, 125 202, 175 192 C 235 180, 275 162, 265 130 C 255 100, 175 105, 135 76 C 105 54, 155 34, 232 34"
+                  fill="none" stroke="#bae6fd" stroke-width="11" stroke-linecap="round" opacity="0.5" />
+            <path d="M 48 232 C 100 232, 125 202, 175 192 C 235 180, 275 162, 265 130 C 255 100, 175 105, 135 76 C 105 54, 155 34, 232 34"
+                  fill="none" stroke="url(#roadGrad)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="7 4" />
+
+            <rect x="64" y="192" width="76" height="16" rx="8" fill="#ffffff" stroke="#bae6fd" stroke-width="1" />
+            <text x="102" y="203" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0369a1">114km · 1h23m</text>
+
+            <rect x="248" y="164" width="78" height="16" rx="8" fill="#ffffff" stroke="#bae6fd" stroke-width="1" />
+            <text x="287" y="175" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0369a1">82.9km · 1h06m</text>
+
+            <rect x="148" y="96" width="76" height="16" rx="8" fill="#ffffff" stroke="#bae6fd" stroke-width="1" />
+            <text x="186" y="107" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0369a1">141km · 1h41m</text>
+
+            <rect x="116" y="12" width="72" height="16" rx="8" fill="#ffffff" stroke="#bae6fd" stroke-width="1" />
+            <text x="152" y="23" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0f294a">40.6km · 35m</text>
+
+            <g filter="url(#nodeShadow)">
+              <circle cx="48" cy="232" r="8" fill="#0284c7" stroke="#ffffff" stroke-width="2.5" />
+              <text x="48" y="253" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0f172a">成田機場 T3</text>
+              <text x="48" y="264" text-anchor="middle" font-size="8.5" fill="#475569">09:30 出發</text>
+            </g>
+
+            <g filter="url(#nodeShadow)">
+              <circle cx="175" cy="192" r="8" fill="#0ea5e9" stroke="#ffffff" stroke-width="2.5" />
+              <text x="182" y="216" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0369a1">① 三芳 PA (下り)</text>
+              <text x="182" y="227" text-anchor="middle" font-size="8.5" fill="#475569">10:55 – 11:25</text>
+            </g>
+
+            <g filter="url(#nodeShadow)">
+              <circle cx="265" cy="130" r="10.5" fill="#f59e0b" stroke="#ffffff" stroke-width="2.5" />
+              <text x="265" y="133.5" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#ffffff">★</text>
+              <text x="292" y="99" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#b45309">② AEON MALL 高崎</text>
+              <text x="292" y="110" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#92400e">12:30 – 14:15 (大補貨)</text>
+            </g>
+
+            <g filter="url(#nodeShadow)">
+              <circle cx="135" cy="76" r="8" fill="#0ea5e9" stroke="#ffffff" stroke-width="2.5" />
+              <text x="68" y="72" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0369a1">③ 松代 PA (下り)</text>
+              <text x="68" y="83" text-anchor="middle" font-size="8.5" fill="#475569">15:55 – 16:25</text>
+            </g>
+
+            <g filter="url(#nodeShadow)">
+              <circle cx="232" cy="34" r="9.5" fill="#0f294a" stroke="#ffffff" stroke-width="2.5" />
+              <text x="295" y="32" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0f294a">ホテルシルクイン斑尾</text>
+              <text x="295" y="44" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0284c7">17:00 – 17:15 抵達</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="mt-3 bg-sky-50/90 border border-sky-200/80 rounded-2xl p-3 flex items-start gap-2.5 text-xs text-sky-900">
+          <i class="fa-solid fa-diamond-turn-right text-sky-600 text-base mt-0.5"></i>
+          <div>
+            <strong>一鍵導航用法：</strong>每張站點卡都有藍色導航掣，撳落去會直接彈去你手機嘅 <strong>Google Maps App</strong>，自動以你<strong>當下即時位置</strong>做起點帶路，唔怕分車行失散！
+          </div>
+        </div>
+      </div>
+
+      <!-- 逐站時間軸卡片 -->
+      <div class="relative pl-6 border-l-2 border-sky-300 space-y-5 ml-2">
+
+        <!-- 起點：成田機場 T3 -->
+        <div class="relative glass-card rounded-3xl p-4 sm:p-5 overflow-hidden">
+          <div aria-hidden="true" class="absolute -bottom-3 -right-2 font-serif text-7xl font-bold text-slate-100 pointer-events-none select-none">00</div>
+          <span class="absolute -left-[33px] top-6 w-4 h-4 rounded-full bg-sky-600 ring-4 ring-white shadow"></span>
+          <div class="relative">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">起點 · 09:30 開車出發</span>
+              <span class="text-xs font-medium text-slate-600">06:20 GK28 抵達成田</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mt-2">成田國際機場 第3航廈（取車點）</h3>
+            <p class="text-xs text-slate-600 font-medium">日文路牌對照：成田空港 第3ターミナル ➔ 東関東自動車道</p>
+            <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+              辦好租車手續、將雪板袋同大行李上車，check 清楚架車裝咗<strong>雪胎（スタッドレスタイヤ）</strong>同插好 ETC 卡，09:30 準時出發！
+            </p>
+            <div class="mt-3.5">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=Narita+International+Airport+Terminal+3&destination_place_id=ChIJYd_6WXnzImAR89wPaFU25-8&travelmode=driving"
+                 target="_blank" rel="noopener noreferrer" aria-label="開啟 Google Maps 導航至成田國際機場第3航廈"
+                 class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+                <i class="fa-solid fa-location-arrow text-sky-300"></i>
+                <span>Google Maps 查看成田 T3 位置</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第 1 站：三芳 PA (下り) -->
+        <div class="relative glass-card rounded-3xl p-4 sm:p-5 overflow-hidden">
+          <div aria-hidden="true" class="absolute -bottom-3 -right-2 font-serif text-7xl font-bold text-sky-50 pointer-events-none select-none">01</div>
+          <span class="absolute -left-[33px] top-6 w-4 h-4 rounded-full bg-sky-500 ring-4 ring-white shadow"></span>
+          <div class="relative">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <span class="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">第 1 站 · 10:55 – 11:25 (停30分)</span>
+              <span class="text-xs font-medium text-slate-600"><i class="fa-solid fa-car-side mr-1 text-sky-600"></i>上段 114km / 約 1h23m</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mt-2">三芳 PA 下行（Pasar 三芳）</h3>
+            <p class="text-xs text-slate-600 font-medium">日文路牌對照：関越自動車道・三芳パーキングエリア（下り）</p>
+            <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+              由外環道轉入關越道第一個大型休息站。啱晒大家落機坐咗個幾鐘車落嚟去洗手間、買杯熱咖啡提神，仲有川越番薯甜點同狹山茶手信買。
+            </p>
+            <div class="mt-3.5">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=Miyoshi+Parking+Area+Down&destination_place_id=ChIJPZZcG-TcGGAReH_JmzI5t5A&travelmode=driving"
+                 target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去第 1 站三芳 PA 下行"
+                 class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+                <i class="fa-solid fa-diamond-turn-right"></i>
+                <span>一鍵導航去 第 1 站：三芳 PA（下り）</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第 2 站：AEON MALL 高崎 -->
+        <div class="relative glass-card rounded-3xl p-4 sm:p-5 border-2 border-amber-300/90 overflow-hidden">
+          <div aria-hidden="true" class="absolute -bottom-3 -right-2 font-serif text-7xl font-bold text-amber-50 pointer-events-none select-none">02</div>
+          <span class="absolute -left-[34px] top-6 w-4 h-4 rounded-full bg-amber-500 ring-4 ring-white shadow"></span>
+          <div class="relative">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <span class="text-xs font-bold text-amber-950 bg-amber-100 px-2.5 py-0.5 rounded-full">★ 第 2 站 · 12:30 – 14:15 (停1h45m)</span>
+              <span class="text-xs font-medium text-slate-600"><i class="fa-solid fa-car-side mr-1 text-amber-600"></i>上段 82.9km / 約 1h06m</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mt-2">AEON MALL 高崎（路線正中大補貨）</h3>
+            <p class="text-xs text-slate-600 font-medium">日文路牌對照：前橋IC出口 ➔ イオンモール高崎</p>
+            <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+              正值午飯黃金時間！全館鋪頭同 Food Court 開齊，大家可分頭食 Lunch，再去大型 AEON 超市掃齊 6 晚滑雪零食、杯麵、飲品、暖包同保濕用品。
+            </p>
+            <div class="mt-2.5 bg-amber-50/90 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-950">
+              <i class="fa-solid fa-triangle-exclamation text-amber-700 mr-1"></i>
+              <strong>泊車提示：</strong>有裝車頂行李箱（Roof Box）嘅車請泊<strong>露天平面停車場</strong>，避免入限高室內場。
+            </div>
+            <div class="mt-3.5">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=AEON+MALL+Takasaki&destination_place_id=ChIJ9RKkNYSMHmARnWhbGboVq_Q&travelmode=driving"
+                 target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去第 2 站 AEON MALL 高崎"
+                 class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+                <i class="fa-solid fa-diamond-turn-right"></i>
+                <span>一鍵導航去 第 2 站：AEON MALL 高崎</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第 3 站：松代 PA (下り) -->
+        <div class="relative glass-card rounded-3xl p-4 sm:p-5 overflow-hidden">
+          <div aria-hidden="true" class="absolute -bottom-3 -right-2 font-serif text-7xl font-bold text-sky-50 pointer-events-none select-none">03</div>
+          <span class="absolute -left-[33px] top-6 w-4 h-4 rounded-full bg-sky-500 ring-4 ring-white shadow"></span>
+          <div class="relative">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <span class="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full">第 3 站 · 15:55 – 16:25 (停30分)</span>
+              <span class="text-xs font-medium text-slate-600"><i class="fa-solid fa-car-side mr-1 text-sky-600"></i>上段 141km / 約 1h41m</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mt-2">松代 PA 下行（上雪山前最後補給）</h3>
+            <p class="text-xs text-slate-600 font-medium">日文路牌對照：上信越自動車道・松代パーキングエリア（下り）</p>
+            <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+              臨上斑尾高原山路前最後一個中型休息站！必去洗手間、買信州蘋果批、野澤菜小食同熱飲。開車前記得開大車頭燈準備入夜上雪山。
+            </p>
+            <div class="mt-3.5">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=Matsushiro+Parking+Area+Northbound&destination_place_id=ChIJlXPx48WEHWARtfIzJcirHHA&travelmode=driving"
+                 target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去第 3 站松代 PA 下行"
+                 class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+                <i class="fa-solid fa-diamond-turn-right"></i>
+                <span>一鍵導航去 第 3 站：松代 PA（下り）</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 終點：ホテルシルクイン斑尾 -->
+        <div class="relative glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 border-2 border-snow-800/30 overflow-hidden">
+          <div aria-hidden="true" class="absolute -bottom-3 -right-2 font-serif text-7xl font-bold text-sky-100/70 pointer-events-none select-none">宿</div>
+          <span class="absolute -left-[34px] top-6 w-4 h-4 rounded-full bg-snow-900 ring-4 ring-white shadow"></span>
+          <div class="relative">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <span class="text-xs font-bold text-white bg-snow-900 px-2.5 py-0.5 rounded-full">終點 · 預計 17:00 – 17:15 抵達</span>
+              <span class="text-xs font-medium text-slate-600"><i class="fa-solid fa-car-side mr-1 text-snow-700"></i>上段 40.6km / 約 35m</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mt-2">倉本温泉 ホテルシルクイン斑尾</h3>
+            <p class="text-xs text-slate-600 font-medium">日文路牌對照：豊田飯山IC出口 ➔ 斑尾高原方面</p>
+            <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+              由豐田飯山 IC 落高速後行約 25 分鐘雪地山路上山即達！酒店門口有<strong>免費住客停車場</strong>，落行李辦理 Check-in 後就食得酒店自助晚餐。
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button onclick="copyText('0269-64-3241')" aria-label="複製酒店車機電話號碼 0269-64-3241" class="min-h-[48px] text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 transition">
+                <i class="fa-solid fa-phone mr-1 text-sky-700"></i>複製車機電話: 0269-64-3241
+              </button>
+              <button onclick="copyText('長野県飯山市斑尾高原 11492-376')" aria-label="複製酒店日文地址" class="min-h-[48px] text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 transition">
+                <i class="fa-regular fa-copy mr-1 text-sky-700"></i>複製日文地址
+              </button>
+            </div>
+            <div class="mt-3.5">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=Hotel+Silk+In+Madarao&destination_place_id=ChIJ6-PetV0j9l8RvC39yyIm7lw&travelmode=driving"
+                 target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去終點ホテルシルクイン斑尾"
+                 class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-snow-900 hover:bg-snow-700 text-white text-sm font-bold py-3.5 px-4 rounded-2xl shadow">
+                <i class="fa-solid fa-flag-checkered text-sky-300"></i>
+                <span>一鍵導航去 終點：ホテルシルクイン斑尾</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 3：酒店與房號分配 ==================== -->
+    <section id="panel-hotel" role="tabpanel" aria-labelledby="tab-hotel" class="hidden space-y-4">
+      <div class="glass-card rounded-3xl p-4 sm:p-5 shadow-sm space-y-5">
+        <div>
+          <span class="text-[11px] font-bold tracking-widest text-sky-700 uppercase">STEP 3 · ACCOMMODATION</span>
+          <h2 class="font-serif text-xl font-bold text-slate-900">倉本温泉 ホテルシルクイン斑尾</h2>
+          <p class="text-xs text-slate-600 mt-1">預約編號：<strong>1235</strong> ｜ 2027/02/14 – 02/20（共 6 晚）</p>
+        </div>
+
+        <div id="my-room-banner" class="hidden bg-gradient-to-r from-snow-900 to-sky-800 text-white rounded-2xl p-3.5 shadow-md">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-sky-200">MY ROOM · 已置頂儲存</span>
+              <div id="my-room-title" class="text-base font-bold mt-0.5">2樓 · 1206 室（2 人房）</div>
+            </div>
+            <button onclick="clearMyRoom()" aria-label="取消標記我的房間" class="min-h-[48px] min-w-[48px] text-xs bg-white/15 hover:bg-white/25 px-3 py-2 rounded-xl font-bold">取消</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 text-xs">
+          <div class="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+            <div class="text-slate-600 font-medium">入住 / 退房時間</div>
+            <div class="font-bold text-slate-900 mt-0.5">15:00 後 / 10:00 前</div>
+          </div>
+          <div class="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+            <div class="text-slate-600 font-medium">膳食安排</div>
+            <div class="font-bold text-slate-900 mt-0.5">包早晚自助餐 Buffet</div>
+          </div>
+          <div class="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+            <div class="text-slate-600 font-medium">住客泊車</div>
+            <div class="font-bold text-emerald-800 mt-0.5">免費停車場（免預約）</div>
+          </div>
+          <div class="bg-sky-50 border border-sky-100 rounded-2xl p-3">
+            <div class="text-slate-600 font-medium">酒店雪具租借</div>
+            <div class="font-bold text-slate-900 mt-0.5">板鞋 ¥4,000 / 衫褲 ¥2,000</div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 mb-2.5 flex items-center justify-between">
+            <span><i class="fa-solid fa-door-open text-sky-700 mr-1.5"></i>本館和洋室房號（點星號標記自己房間）</span>
+            <span class="text-[11px] font-medium text-slate-600">29–36㎡ 禁煙</span>
+          </h3>
+          <div id="room-list-container" class="divide-y divide-slate-200 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-white" data-room="2樓 · 1201 室（1 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">2樓 · 1201 室</span>
+                <span class="ml-2 bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-medium">1 人房</span>
+              </div>
+              <button onclick="setMyRoom('2樓 · 1201 室（1 人房）')" aria-label="將 1201 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-slate-50/70" data-room="2樓 · 1206 室（2 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">2樓 · 1206 室</span>
+                <span class="ml-2 bg-sky-100 text-sky-900 px-2 py-0.5 rounded-full font-medium">2 人房</span>
+              </div>
+              <button onclick="setMyRoom('2樓 · 1206 室（2 人房）')" aria-label="將 1206 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-white" data-room="3樓 · 1301 室（2 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">3樓 · 1301 室</span>
+                <span class="ml-2 bg-sky-100 text-sky-900 px-2 py-0.5 rounded-full font-medium">2 人房</span>
+              </div>
+              <button onclick="setMyRoom('3樓 · 1301 室（2 人房）')" aria-label="將 1301 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-slate-50/70" data-room="3樓 · 1306 室（2 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">3樓 · 1306 室</span>
+                <span class="ml-2 bg-sky-100 text-sky-900 px-2 py-0.5 rounded-full font-medium">2 人房</span>
+              </div>
+              <button onclick="setMyRoom('3樓 · 1306 室（2 人房）')" aria-label="將 1306 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-white" data-room="4樓 · 1406 室（2 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">4樓 · 1406 室</span>
+                <span class="ml-2 bg-sky-100 text-sky-900 px-2 py-0.5 rounded-full font-medium">2 人房</span>
+              </div>
+              <button onclick="setMyRoom('4樓 · 1406 室（2 人房）')" aria-label="將 1406 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-slate-50/70" data-room="5樓 · 1501 室（2 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">5樓 · 1501 室</span>
+                <span class="ml-2 bg-sky-100 text-sky-900 px-2 py-0.5 rounded-full font-medium">2 人房</span>
+              </div>
+              <button onclick="setMyRoom('5樓 · 1501 室（2 人房）')" aria-label="將 1501 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+            <div class="room-item flex items-center justify-between px-3.5 py-2 bg-white" data-room="5樓 · 1506 室（3 人房）">
+              <div>
+                <span class="font-bold text-snow-900 text-sm">5樓 · 1506 室</span>
+                <span class="ml-2 bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-medium">3 人房（男性3名）</span>
+              </div>
+              <button onclick="setMyRoom('5樓 · 1506 室（3 人房）')" aria-label="將 1506 室設為我的房間" class="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-sky-50 hover:text-sky-700 transition">
+                <i class="fa-regular fa-star text-base"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-1 flex flex-col sm:flex-row gap-2">
+          <button onclick="copyText('長野県飯山市斑尾高原 11492-376')" aria-label="複製酒店日文地址" class="min-h-[48px] flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold py-3 px-4 rounded-2xl transition">
+            <i class="fa-regular fa-copy mr-1.5"></i>複製日文地址
+          </button>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=Hotel+Silk+In+Madarao&destination_place_id=ChIJ6-PetV0j9l8RvC39yyIm7lw&travelmode=driving"
+             target="_blank" rel="noopener noreferrer" aria-label="開啟 Google Maps 導航至ホテルシルクイン斑尾"
+             class="min-h-[48px] flex-1 bg-snow-900 hover:bg-snow-700 text-white text-xs font-bold py-3 px-4 rounded-2xl inline-flex items-center justify-center transition">
+            <i class="fa-solid fa-location-dot mr-1.5 text-sky-300"></i>開啟酒店地圖導航
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 4：4 大雪場地圖與中高級雪道攻略 ==================== -->
+    <section id="panel-skimap" role="tabpanel" aria-labelledby="tab-skimap" class="hidden space-y-5">
+      <div class="glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 space-y-2.5">
+        <span class="text-[11px] font-bold tracking-widest text-sky-700 uppercase">INTERMEDIATE & ADVANCED · 中上級ゲレンデガイド</span>
+        <h2 class="font-serif text-lg sm:text-xl font-bold text-slate-900">四大雪場雪道圖與中高級路線攻略</h2>
+        <p class="text-xs text-slate-700 leading-relaxed">
+          每張地圖均支援<strong>「概覽 SVG（離線極速）」</strong>與<strong>「官方原圖 WebP（細節放大）」</strong>雙模式自由切換，點擊地圖即可全螢幕雙指縮放。
+        </p>
+      </div>
+
+      <!-- 1 & 2. Madarao & Tangram 雙山共通雪道圖 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex flex-wrap gap-1.5 mb-1.5">
+              <span class="text-[11px] font-bold bg-sky-700 text-white px-2.5 py-0.5 rounded-full">主場雙山共通</span>
+              <span class="text-[11px] font-bold bg-purple-100 text-purple-900 px-2.5 py-0.5 rounded-full">海拔 1,381m 斑尾山</span>
+            </div>
+            <h3 class="font-serif text-lg font-bold text-slate-900">斑尾高原スキー場 × タングラム斑尾</h3>
+            <p class="text-xs text-slate-600">Madarao Mountain Resort & Tangram Ski Circus</p>
+          </div>
+          <button onclick="openMapViewer('madarao')" aria-label="全螢幕放大檢視斑尾高原與 Tangram 雪道圖" class="min-h-[48px] min-w-[48px] shrink-0 bg-sky-100 hover:bg-sky-200 text-sky-950 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-magnifying-glass-plus"></i>
+            <span>全螢幕</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl" role="group" aria-label="切換斑尾地圖顯示模式">
+          <button onclick="toggleCardMapMode('madarao', 'svg')" id="mode-btn-madarao-svg" aria-label="切換至斑尾概覽 SVG 圖" class="min-h-[48px] rounded-xl bg-white text-slate-900 text-xs font-bold shadow-sm transition">
+            <i class="fa-solid fa-vector-square text-sky-700 mr-1"></i>概覽圖 (SVG)
+          </button>
+          <button onclick="toggleCardMapMode('madarao', 'webp')" id="mode-btn-madarao-webp" aria-label="切換至斑尾官方原圖 WebP" class="min-h-[48px] rounded-xl text-slate-600 text-xs font-bold transition">
+            <i class="fa-regular fa-image text-sky-700 mr-1"></i>官方原圖 (WebP)
+          </button>
+        </div>
+
+        <div onclick="openMapViewer('madarao')" class="cursor-zoom-in bg-gradient-to-b from-sky-100/70 via-white to-slate-50 rounded-2xl p-2.5 border border-sky-100 shadow-inner relative">
+          <div id="view-madarao-svg">
+            <svg id="svg-map-madarao" viewBox="0 0 360 230" class="w-full h-auto select-none">
+              <polygon points="8,205 135,26 238,60 352,205" fill="#E0F2FE" stroke="#BAE6FD" stroke-width="1.5"/>
+              <polygon points="135,26 112,60 135,50 158,60" fill="#FFFFFF"/>
+              <text x="135" y="17" text-anchor="middle" font-size="10" font-weight="bold" fill="#0F294A">斑尾山 1,381m (Mt. Madarao)</text>
+
+              <line x1="205" y1="50" x2="232" y2="200" stroke="#7C3AED" stroke-width="2" stroke-dasharray="4 3"/>
+              <rect x="168" y="106" width="88" height="16" rx="8" fill="#F3E8FF" stroke="#C084FC" stroke-width="1"/>
+              <text x="212" y="117" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#6B21A8">タングラム境界線</text>
+
+              <rect x="36" y="64" width="144" height="26" rx="6" fill="#0F294A"/>
+              <text x="108" y="75" text-anchor="middle" font-size="8" font-weight="bold" fill="#FFFFFF">21 Powder Theater · 23 Wave 2</text>
+              <text x="108" y="85" text-anchor="middle" font-size="7" fill="#BAE6FD">29 NINJA · 30-32 SAWA I-III 天然半管</text>
+
+              <rect x="18" y="132" width="88" height="26" rx="6" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1"/>
+              <text x="62" y="143" text-anchor="middle" font-size="8" font-weight="bold" fill="#0369A1">27 Crystal Bowl</text>
+              <text x="62" y="153" text-anchor="middle" font-size="7" fill="#0284C7">第13 Lift · 13號/14號非壓雪</text>
+
+              <rect x="112" y="132" width="84" height="26" rx="6" fill="#FEF3C7" stroke="#FBBF24" stroke-width="1"/>
+              <text x="154" y="143" text-anchor="middle" font-size="8" font-weight="bold" fill="#92400E">17 Free Ride Park</text>
+              <text x="154" y="153" text-anchor="middle" font-size="7" fill="#B45309">8 Carving · 9 Giant 紅黑線</text>
+
+              <rect x="246" y="84" width="96" height="24" rx="6" fill="#F3E8FF" stroke="#C084FC" stroke-width="1"/>
+              <text x="294" y="94" text-anchor="middle" font-size="8" font-weight="bold" fill="#6B21A8">野尻湖テラス・ラウンジ</text>
+              <text x="294" y="104" text-anchor="middle" font-size="7" fill="#7E22CE">Tangram 第1 & 第2 Lift</text>
+
+              <rect x="244" y="138" width="96" height="24" rx="6" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1"/>
+              <text x="292" y="148" text-anchor="middle" font-size="8" font-weight="bold" fill="#0369A1">タングラム斑尾側</text>
+              <text x="292" y="158" text-anchor="middle" font-size="7" fill="#0284C7">第3/第5 Quad · 樹林區</text>
+
+              <rect x="16" y="186" width="186" height="26" rx="8" fill="#0F294A"/>
+              <text x="109" y="197" text-anchor="middle" font-size="8" font-weight="bold" fill="#FFFFFF">白樺租借 · 餐廳 Heidi (第1 Lift 下部)</text>
+              <text x="109" y="207" text-anchor="middle" font-size="7" fill="#93C5FD">Aki's Pub & Cafe · 總合案內所</text>
+
+              <rect x="238" y="186" width="108" height="26" rx="8" fill="#4C1D95"/>
+              <text x="292" y="202" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#FFFFFF">Hotel Tangram 基地</text>
+            </svg>
+          </div>
+          <div id="view-madarao-webp" class="hidden">
+            <img id="img-webp-madarao" src="./maps/madarao.webp" alt="斑尾高原與 Tangram 官方雪道圖"
+                 onerror="handleWebpFallback(this, 'madarao', 'madarao.webp')"
+                 class="w-full h-auto rounded-xl object-contain" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-sky-50 border border-sky-200 rounded-xl p-2.5">
+            <span class="font-bold text-sky-950 block">🌲 樹林與天然半管</span>
+            <span class="text-sky-900 text-[11px]">SAWA I–III 天然地形半管、NINJA、Powder Wave 2、Powder Theater 及 Adventure Aisle。</span>
+          </div>
+          <div class="bg-purple-50 border border-purple-200 rounded-xl p-2.5">
+            <span class="font-bold text-purple-950 block">⚡ 高速 Carving 與公園</span>
+            <span class="text-purple-900 text-[11px]">8 號 Carving、9 號 Giant、14 號 Powder Line 及 Tangram 側寬闊中上級高速坡。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. スノーリゾートロマンスの神様 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex flex-wrap gap-1.5 mb-1.5">
+              <span class="text-[11px] font-bold bg-rose-700 text-white px-2.5 py-0.5 rounded-full">高社山 1,351m</span>
+              <span class="text-[11px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">40度非壓雪陡坡 · 350m 斜壁道</span>
+            </div>
+            <h3 class="font-serif text-lg font-bold text-slate-900">スノーリゾートロマンスの神様</h3>
+            <p class="text-xs text-slate-600">Snow Resort Romance no Kamisama（舊木島平スキー場）</p>
+          </div>
+          <button onclick="openMapViewer('romance')" aria-label="全螢幕放大檢視スノーリゾートロマンスの神様雪道圖" class="min-h-[48px] min-w-[48px] shrink-0 bg-rose-100 hover:bg-rose-200 text-rose-950 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-magnifying-glass-plus"></i>
+            <span>全螢幕</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl" role="group" aria-label="切換ロマンスの神様地圖顯示模式">
+          <button onclick="toggleCardMapMode('romance', 'svg')" id="mode-btn-romance-svg" aria-label="切換至ロマンスの神様概覽 SVG 圖" class="min-h-[48px] rounded-xl bg-white text-slate-900 text-xs font-bold shadow-sm transition">
+            <i class="fa-solid fa-vector-square text-rose-700 mr-1"></i>概覽圖 (SVG)
+          </button>
+          <button onclick="toggleCardMapMode('romance', 'webp')" id="mode-btn-romance-webp" aria-label="切換至ロマンスの神様官方原圖 WebP" class="min-h-[48px] rounded-xl text-slate-600 text-xs font-bold transition">
+            <i class="fa-regular fa-image text-rose-700 mr-1"></i>官方原圖 (WebP)
+          </button>
+        </div>
+
+        <div onclick="openMapViewer('romance')" class="cursor-zoom-in bg-gradient-to-b from-sky-100/70 via-white to-slate-50 rounded-2xl p-2.5 border border-sky-100 shadow-inner">
+          <div id="view-romance-svg">
+            <svg id="svg-map-romance" viewBox="0 0 360 210" class="w-full h-auto select-none">
+              <polygon points="26,192 155,20 334,192" fill="#E0F2FE" stroke="#BAE6FD" stroke-width="1.5"/>
+              <polygon points="155,20 135,50 155,42 175,50" fill="#FFFFFF"/>
+              <text x="155" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="#0F294A">高社山 1,351m</text>
+
+              <rect x="86" y="46" width="138" height="24" rx="6" fill="#0F172A"/>
+              <text x="155" y="57" text-anchor="middle" font-size="8" font-weight="bold" fill="#FFFFFF">A パイオニア(全非圧雪) · B ウエッスン</text>
+              <text x="155" y="66" text-anchor="middle" font-size="7" fill="#FCA5A5">パイオニアリフト (870m) 上級黑線區</text>
+
+              <rect x="34" y="92" width="110" height="26" rx="6" fill="#FFE4E6" stroke="#FB7185" stroke-width="1"/>
+              <text x="89" y="103" text-anchor="middle" font-size="8" font-weight="bold" fill="#BE123C">G シルクコース (594m)</text>
+              <text x="89" y="113" text-anchor="middle" font-size="7" fill="#9F1239">約350m Banked Slalom＋波浪地形</text>
+
+              <rect x="166" y="92" width="128" height="26" rx="6" fill="#FEF2F2" stroke="#F87171" stroke-width="1"/>
+              <text x="230" y="103" text-anchor="middle" font-size="8" font-weight="bold" fill="#B91C1C">D R40陡坡 · E パッション · F スカイ</text>
+              <text x="230" y="113" text-anchor="middle" font-size="7" fill="#991B1B">降雪時全非壓雪・中上級高速巡航</text>
+
+              <rect x="70" y="146" width="220" height="24" rx="6" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1"/>
+              <text x="180" y="156" text-anchor="middle" font-size="8" font-weight="bold" fill="#0369A1">C ヤマビコ連絡路 · スカイリフト (1,203m)</text>
+              <text x="180" y="166" text-anchor="middle" font-size="7" fill="#0284C7">ロマンスリフト (645m) · 中央 / 山麓 P 停車場</text>
+
+              <rect x="95" y="180" width="170" height="20" rx="8" fill="#0F294A"/>
+              <text x="180" y="193" text-anchor="middle" font-size="8" font-weight="bold" fill="#FFFFFF">山麓基地 · 免費大型停車場</text>
+            </svg>
+          </div>
+          <div id="view-romance-webp" class="hidden">
+            <img id="img-webp-romance" src="./maps/romance.webp" alt="スノーリゾートロマンスの神様官方雪道圖"
+                 onerror="handleWebpFallback(this, 'romance', 'romance.webp')"
+                 class="w-full h-auto rounded-xl object-contain" />
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-700 leading-relaxed">
+          <strong class="text-slate-900">中高級亮點：</strong>乘搭「パイオニアリフト」直上 1,351m 山頂，可挑戰全非壓雪粉雪區<strong>パイオニアコース</strong>、新開放上級黑線<strong>ウエッスンコース</strong>，以及最大斜度達 40 度嘅 <strong>R40</strong>；中段「シルクコース」設有 <strong>350m Banked Slalom（斜壁回轉道）</strong>，極啱單板玩家練轉向同地形玩法。
+        </p>
+      </div>
+
+      <!-- 4. 野沢温泉スキー場 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex flex-wrap gap-1.5 mb-1.5">
+              <span class="text-[11px] font-bold bg-snow-900 text-white px-2.5 py-0.5 rounded-full">毛無山 1,650m</span>
+              <span class="text-[11px] font-bold bg-sky-100 text-sky-900 px-2.5 py-0.5 rounded-full">垂直落差 1,085m · 3.5km 山脊紅線</span>
+            </div>
+            <h3 class="font-serif text-lg font-bold text-slate-900">野沢温泉スキー場（Nozawa Onsen）</h3>
+            <p class="text-xs text-slate-600">長野県下高井郡野沢温泉村豊郷 7653｜Tel: 0269-85-3166</p>
+          </div>
+          <button onclick="openMapViewer('nozawa')" aria-label="全螢幕放大檢視野沢温泉スキー場雪道圖" class="min-h-[48px] min-w-[48px] shrink-0 bg-slate-200 hover:bg-slate-300 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-magnifying-glass-plus"></i>
+            <span>全螢幕</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl" role="group" aria-label="切換野澤溫泉地圖顯示模式">
+          <button onclick="toggleCardMapMode('nozawa', 'svg')" id="mode-btn-nozawa-svg" aria-label="切換至野澤溫泉概覽 SVG 圖" class="min-h-[48px] rounded-xl bg-white text-slate-900 text-xs font-bold shadow-sm transition">
+            <i class="fa-solid fa-vector-square text-snow-800 mr-1"></i>概覽圖 (SVG)
+          </button>
+          <button onclick="toggleCardMapMode('nozawa', 'webp')" id="mode-btn-nozawa-webp" aria-label="切換至野澤溫泉官方原圖 WebP" class="min-h-[48px] rounded-xl text-slate-600 text-xs font-bold transition">
+            <i class="fa-regular fa-image text-snow-800 mr-1"></i>官方原圖 (WebP)
+          </button>
+        </div>
+
+        <div onclick="openMapViewer('nozawa')" class="cursor-zoom-in bg-gradient-to-b from-sky-100/70 via-white to-slate-50 rounded-2xl p-2.5 border border-sky-100 shadow-inner">
+          <div id="view-nozawa-svg">
+            <svg id="svg-map-nozawa" viewBox="0 0 360 225" class="w-full h-auto select-none">
+              <polygon points="10,205 195,20 350,205" fill="#E0F2FE" stroke="#BAE6FD" stroke-width="1.5"/>
+              <polygon points="195,20 170,52 195,43 220,52" fill="#FFFFFF"/>
+              <text x="195" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="#0F294A">毛無山山頂 1,650m (YAMABIKO)</text>
+
+              <rect x="130" y="44" width="130" height="24" rx="6" fill="#0F294A"/>
+              <text x="195" y="54" text-anchor="middle" font-size="8" font-weight="bold" fill="#FFFFFF">1–5 YAMABIKO A–E 粉雪樹林</text>
+              <text x="195" y="64" text-anchor="middle" font-size="7" fill="#BAE6FD">山彥站 1,417m (高海拔乾粉雪區)</text>
+
+              <rect x="52" y="84" width="138" height="24" rx="6" fill="#1E293B"/>
+              <text x="121" y="94" text-anchor="middle" font-size="8" font-weight="bold" fill="#FFFFFF">16 SCHNEIDER · 18 39度陡壁</text>
+              <text x="121" y="104" text-anchor="middle" font-size="7" fill="#FCA5A5">24–25 KANDAHAR 國際賽道黑線</text>
+
+              <rect x="218" y="88" width="118" height="24" rx="6" fill="#FFE4E6" stroke="#FB7185" stroke-width="1"/>
+              <text x="277" y="98" text-anchor="middle" font-size="8" font-weight="bold" fill="#BE123C">26 SKYLINE (3,500m)</text>
+              <text x="277" y="108" text-anchor="middle" font-size="7" fill="#9F1239">超爽高速山脊全景紅線</text>
+
+              <rect x="42" y="138" width="115" height="24" rx="6" fill="#FEF3C7" stroke="#FBBF24" stroke-width="1"/>
+              <text x="99" y="148" text-anchor="middle" font-size="8" font-weight="bold" fill="#92400E">27 GRAND PRIX 黑線</text>
+              <text x="99" y="158" text-anchor="middle" font-size="7" fill="#B45309">日影站 660m · 陡坡大回轉</text>
+
+              <rect x="172" y="138" width="130" height="24" rx="6" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1"/>
+              <text x="237" y="148" text-anchor="middle" font-size="8" font-weight="bold" fill="#0369A1">NAGASAKA 長坂站 627m</text>
+              <text x="237" y="158" text-anchor="middle" font-size="7" fill="#0284C7">長坂高速箱纜 (直達山頂 1,417m)</text>
+
+              <rect x="55" y="182" width="250" height="24" rx="8" fill="#1E293B"/>
+              <text x="180" y="197" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#FFFFFF">野澤溫泉街 · 13 個免費外湯 · 村內免費接駁巴士</text>
+            </svg>
+          </div>
+          <div id="view-nozawa-webp" class="hidden">
+            <img id="img-webp-nozawa" src="./maps/nozawa.webp" alt="野沢温泉スキー場 2026 官方雪道圖"
+                 onerror="handleWebpFallback(this, 'nozawa', 'nozawa.webp')"
+                 class="w-full h-auto rounded-xl object-contain" />
+          </div>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-700 space-y-1">
+          <p><strong class="text-slate-900">中高級路線建議：</strong>泊車於<strong>長坂中心（Nagasaka Center House）</strong>，搭長坂箱纜直上 1,417m 主攻 <strong>YAMABIKO（山彥 A–E 非壓雪與樹林）</strong>，之後沿 <strong>3,500m SKYLINE</strong> 山脊高速衝落山腳，或挑戰 <strong>Challenge 39度壁</strong>、<strong>Schneider</strong> 及 <strong>Kandahar</strong> 黑線！</p>
+          <p class="text-[11px] font-medium text-slate-600">救護巡邏（Patrol）：0269-85-3456 ｜ 日影中心：0269-85-2133</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 分頁 5：周邊自駕路線（由酒店出發） ==================== -->
+    <section id="panel-local" role="tabpanel" aria-labelledby="tab-local" class="hidden space-y-5">
+      <div class="glass-card jp-pattern-subtle rounded-3xl p-5 space-y-3">
+        <span class="text-[11px] font-bold tracking-widest text-sky-700 uppercase">LOCAL DRIVE · 周辺ドライブ</span>
+        <h2 class="font-serif text-xl font-bold text-slate-900">由酒店出發・周邊自駕路線與時間</h2>
+        <p class="text-xs text-slate-700 leading-relaxed">
+          所有路線均以<strong>倉本温泉 ホテルシルクイン斑尾</strong>為出發參考，撳藍色按鈕會自動用 Google Maps App 由你<strong>當下即時位置</strong>規劃駕車導航。
+        </p>
+
+        <div class="bg-gradient-to-b from-sky-50 to-white rounded-2xl p-3 border border-sky-100 shadow-inner">
+          <svg viewBox="0 0 360 165" class="w-full h-auto select-none">
+            <line x1="78" y1="85" x2="185" y2="85" stroke="#0284C7" stroke-width="3" stroke-dasharray="5 3"/>
+            <line x1="185" y1="85" x2="295" y2="38" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="5 3"/>
+            <line x1="185" y1="85" x2="295" y2="132" stroke="#0F294A" stroke-width="2.5" stroke-dasharray="5 3"/>
+
+            <rect x="106" y="64" width="54" height="16" rx="8" fill="#FFFFFF" stroke="#BAE6FD" stroke-width="1"/>
+            <text x="133" y="75" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0369A1">約 22 分</text>
+
+            <rect x="212" y="42" width="54" height="16" rx="8" fill="#FFFFFF" stroke="#FECDD3" stroke-width="1"/>
+            <text x="239" y="53" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#BE123C">約 35 分</text>
+
+            <rect x="212" y="112" width="54" height="16" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+            <text x="239" y="123" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0F294A">約 42 分</text>
+
+            <circle cx="78" cy="85" r="9" fill="#0284C7" stroke="#FFFFFF" stroke-width="2.5"/>
+            <text x="78" y="106" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#0F172A">斑尾高原酒店</text>
+            <text x="78" y="117" text-anchor="middle" font-size="7.5" fill="#64748B">海拔約 1,000m</text>
+
+            <circle cx="185" cy="85" r="8.5" fill="#0EA5E9" stroke="#FFFFFF" stroke-width="2.5"/>
+            <text x="185" y="106" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#0369A1">① 飯山市區</text>
+            <text x="185" y="117" text-anchor="middle" font-size="7.5" fill="#64748B">落山必經 · 超市/晚飯</text>
+
+            <circle cx="295" cy="38" r="8" fill="#E11D48" stroke="#FFFFFF" stroke-width="2.5"/>
+            <text x="295" y="23" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#BE123C">② ロマンスの神様</text>
+            <text x="295" y="57" text-anchor="middle" font-size="7.5" fill="#64748B">經飯山市區往木島平</text>
+
+            <circle cx="295" cy="132" r="8" fill="#0F294A" stroke="#FFFFFF" stroke-width="2.5"/>
+            <text x="295" y="151" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#0F294A">③ 野沢温泉スキー場</text>
+            <text x="295" y="161" text-anchor="middle" font-size="7.5" fill="#64748B">沿千曲川國道 117 號北上</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 路線 1：酒店 -> 飯山市區 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-1 rounded-full">
+            路線 01 · 距離約 13 km
+          </span>
+          <span class="text-xs font-bold text-slate-800">
+            <i class="fa-regular fa-clock text-sky-700 mr-1"></i>雪地車程：約 20 – 25 分鐘
+          </span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">飯山市區 / JR 飯山站周邊</h3>
+          <p class="text-xs text-slate-600">日文對照：飯山市街・飯山駅（縣道 97 號落山直達）</p>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          由斑尾高原落山最近嘅市中心！有大型超市（<strong>Tsuruya ツルヤ 飯山店</strong>）、藥妝店、居酒屋、拉麵店及便利店，晚上想出市區買啤酒零食或食宵夜最方便。
+        </p>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Iiyama+Station+Nagano&travelmode=driving"
+           target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去飯山市區 JR 飯山站"
+           class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+          <i class="fa-solid fa-diamond-turn-right"></i>
+          <span>一鍵導航去 飯山市區（JR 飯山站）</span>
+        </a>
+      </div>
+
+      <!-- 路線 2：酒店 -> スノーリゾートロマンスの神様 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-rose-800 bg-rose-100 px-2.5 py-1 rounded-full">
+            路線 02 · 距離約 20 km
+          </span>
+          <span class="text-xs font-bold text-slate-800">
+            <i class="fa-regular fa-clock text-rose-700 mr-1"></i>雪地車程：約 30 – 35 分鐘
+          </span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">スノーリゾートロマンスの神様</h3>
+          <p class="text-xs text-slate-600">日文對照：長野県下高井郡木島平村大字上木島 3876-2</p>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          由斑尾落山穿過飯山市區（過千曲川大橋）後上高社山即達，全程約半小時，朝早 08:15 由酒店出發啱啱好趕到開門頭纜車。
+        </p>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Snow+Resort+Romance+no+Kamisama&travelmode=driving"
+           target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去スノーリゾートロマンスの神様"
+           class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-rose-700 hover:bg-rose-800 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+          <i class="fa-solid fa-diamond-turn-right"></i>
+          <span>一鍵導航去 スノーリゾートロマンスの神様</span>
+        </a>
+      </div>
+
+      <!-- 路線 3：酒店 -> 野沢温泉スキー場 -->
+      <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-white bg-snow-900 px-2.5 py-1 rounded-full">
+            路線 03 · 距離約 26 km
+          </span>
+          <span class="text-xs font-bold text-slate-800">
+            <i class="fa-regular fa-clock text-snow-800 mr-1"></i>雪地車程：約 40 – 45 分鐘
+          </span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">野沢温泉スキー場（長坂中心 / 日影）</h3>
+          <p class="text-xs text-slate-600">日文對照：野沢温泉スキー場 長坂センターハウス（Tel: 0269-85-3166）</p>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          落山經飯山市區後沿千曲川（國道 117 號）向北行駛，最後一段上野澤溫泉村斜路較窄且多積雪，建議預留 45 分鐘車程，滑完雪仲可以順便行溫泉街同食溫泉蛋！
+        </p>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=Nozawa+Onsen+Snow+Resort+Nagasaka+Center+House&travelmode=driving"
+           target="_blank" rel="noopener noreferrer" aria-label="一鍵導航去野沢温泉スキー場長坂中心"
+           class="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-snow-900 hover:bg-snow-700 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm">
+          <i class="fa-solid fa-diamond-turn-right text-sky-300"></i>
+          <span>一鍵導航去 野沢温泉スキー場</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 底部原生 PWA 固定導航欄 -->
+  <nav aria-label="主要行程導航" class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(15,41,74,0.06)] safe-bottom-nav">
+    <div role="tablist" class="max-w-xl mx-auto px-1.5 pt-1.5 grid grid-cols-5 gap-1">
+      <button role="tab" aria-selected="true" aria-controls="panel-flight" aria-label="航班資料分頁" onclick="switchTab('flight')" id="tab-flight" class="tab-btn min-h-[48px] min-w-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-xl bg-snow-900 text-white shadow-sm transition">
+        <i class="fa-solid fa-plane-departure text-sm mb-0.5"></i>
+        <span class="text-[11px] font-bold tracking-tight">航班</span>
+      </button>
+      <button role="tab" aria-selected="false" aria-controls="panel-route" aria-label="去程自駕路線分頁" onclick="switchTab('route')" id="tab-route" class="tab-btn min-h-[48px] min-w-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i class="fa-solid fa-route text-sm mb-0.5"></i>
+        <span class="text-[11px] font-bold tracking-tight">去程自駕</span>
+      </button>
+      <button role="tab" aria-selected="false" aria-controls="panel-hotel" aria-label="酒店與房號分頁" onclick="switchTab('hotel')" id="tab-hotel" class="tab-btn min-h-[48px] min-w-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i class="fa-solid fa-bed text-sm mb-0.5"></i>
+        <span class="text-[11px] font-bold tracking-tight">酒店房號</span>
+      </button>
+      <button role="tab" aria-selected="false" aria-controls="panel-skimap" aria-label="四大雪場地圖分頁" onclick="switchTab('skimap')" id="tab-skimap" class="tab-btn min-h-[48px] min-w-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i class="fa-solid fa-person-skiing text-sm mb-0.5"></i>
+        <span class="text-[11px] font-bold tracking-tight">雪場地圖</span>
+      </button>
+      <button role="tab" aria-selected="false" aria-controls="panel-local" aria-label="周邊自駕分頁" onclick="switchTab('local')" id="tab-local" class="tab-btn min-h-[48px] min-w-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-600 hover:bg-slate-100 transition">
+        <i class="fa-solid fa-car-side text-sm mb-0.5"></i>
+        <span class="text-[11px] font-bold tracking-tight">周邊自駕</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 加入主畫面教學與原生安裝彈窗 -->
+  <div id="install-modal" role="dialog" aria-modal="true" aria-labelledby="install-modal-title" class="hidden fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img id="modal-app-icon" src="./icon.svg" alt="斑尾滑雪2027 App Icon" class="w-14 h-14 rounded-2xl shadow-md border border-slate-200" />
+          <div>
+            <h3 id="install-modal-title" class="font-serif text-lg font-bold text-slate-900">斑尾滑雪 2027</h3>
+            <p class="text-xs text-slate-600">加到手機主畫面・支援雪山離線開啟</p>
+          </div>
+        </div>
+        <button onclick="closeInstallModal()" aria-label="關閉安裝視窗" class="min-h-[48px] min-w-[48px] rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="native-prompt-box" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-xs text-emerald-950 space-y-2.5">
+        <p class="font-bold"><i class="fa-solid fa-bolt text-emerald-700 mr-1"></i>偵測到你的瀏覽器支援一鍵原生安裝：</p>
+        <button onclick="triggerNativeInstall()" aria-label="立即安裝 PWA 應用程式" class="min-h-[48px] w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition">
+          立即安裝「斑尾滑雪 27」到主畫面
+        </button>
+      </div>
+
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-3.5 text-xs text-slate-800 space-y-2.5">
+        <div id="ios-install-guide" class="flex items-start gap-2.5">
+          <span class="bg-snow-900 text-white font-bold px-2 py-0.5 rounded text-[11px] mt-0.5 shrink-0">iPhone</span>
+          <p>用 <strong>Safari</strong> 開啟此頁，撳底部中間嘅 <i class="fa-solid fa-arrow-up-from-bracket text-sky-700 mx-0.5"></i> <strong>「分享」</strong>，再揀 <strong>「加入主畫面」</strong> 即完成。</p>
+        </div>
+        <div id="android-install-guide" class="border-t border-sky-200/70 pt-2.5 flex items-start gap-2.5">
+          <span class="bg-emerald-700 text-white font-bold px-2 py-0.5 rounded text-[11px] mt-0.5 shrink-0">Android</span>
+          <p>用 <strong>Chrome</strong> 開啟此頁，撳右上角 <strong>⋮</strong> 選單，揀 <strong>「安裝應用程式」</strong> 或 <strong>「加到主畫面」</strong>。</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <a id="download-icon-btn" download="madarao-2027-icon.png" href="./icon.svg" aria-label="下載 App Icon 圖示檔" class="min-h-[48px] flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold py-3 px-3 rounded-2xl inline-flex items-center justify-center transition">
+          <i class="fa-solid fa-download mr-1"></i>下載 Icon 圖示
+        </a>
+        <button onclick="closeInstallModal()" aria-label="完成並返回行程" class="min-h-[48px] flex-1 bg-snow-900 hover:bg-snow-700 text-white text-xs font-bold py-3 px-3 rounded-2xl transition">
+          明白，返去睇行程
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 複製成功提示 Toast -->
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200">
+    已複製到剪貼簿
+  </div>
+
+  <!-- 雪道圖全螢幕放大檢視燈箱 -->
+  <div id="map-lightbox" role="dialog" aria-modal="true" aria-labelledby="map-lightbox-title" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
+    <!-- 頂部標題與顯眼關閉按鈕 -->
+    <div class="shrink-0 flex items-center justify-between gap-2 px-4 py-3 text-white bg-slate-900/90 border-b border-white/15 z-20">
+      <div class="min-w-0 flex-1">
+        <span class="text-[10px] text-sky-300 font-bold uppercase tracking-wider block">SKI TRAIL MAP · 支援雙指縮放 / 單指拖曳</span>
+        <h3 id="map-lightbox-title" class="font-serif text-sm sm:text-base font-bold truncate">雪道圖檢視</h3>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="lightbox-toggle-btn" onclick="toggleLightboxMode()" aria-label="在放大檢視中切換 SVG 或 WebP 原圖" class="min-h-[48px] px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-bold whitespace-nowrap">
+          切換原圖
+        </button>
+        <button onclick="closeMapViewer()" aria-label="關閉全螢幕地圖檢視" class="min-h-[48px] px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-lg whitespace-nowrap">
+          <i class="fa-solid fa-xmark text-base"></i>
+          <span>關閉</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 可雙指縮放與拖曳的畫布區域 -->
+    <div id="map-lightbox-viewport" class="relative flex-1 overflow-hidden touch-none flex items-center justify-center select-none">
+      <div id="map-lightbox-body" class="origin-center transition-transform duration-75 ease-out flex items-center justify-center p-3"></div>
+    </div>
+
+    <!-- 底部縮放與關閉工具列（單手拇指操作最方便） -->
+    <div class="shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900/90 border-t border-white/15 z-20">
+      <button onclick="zoomMapBy(-0.5)" aria-label="縮小地圖" class="min-h-[48px] min-w-[48px] px-3.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-bold inline-flex items-center justify-center gap-1">
+        <i class="fa-solid fa-magnifying-glass-minus"></i>
+        <span>縮小</span>
+      </button>
+      <button onclick="resetMapZoom()" aria-label="重設地圖縮放比例" class="min-h-[48px] px-3.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-sky-200 text-xs font-bold whitespace-nowrap">
+        <span id="zoom-level-label">100%</span> 重設
+      </button>
+      <button onclick="zoomMapBy(0.5)" aria-label="放大地圖" class="min-h-[48px] min-w-[48px] px-3.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-bold inline-flex items-center justify-center gap-1">
+        <i class="fa-solid fa-magnifying-glass-plus"></i>
+        <span>放大</span>
+      </button>
+      <button onclick="closeMapViewer()" aria-label="關閉全螢幕地圖" class="min-h-[48px] px-4 rounded-xl bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap">
+        <i class="fa-solid fa-xmark"></i>
+        <span>關閉地圖</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+// ... existing code ... -->
+    const cardMapModes = { madarao: 'svg', romance: 'svg', nozawa: 'svg' };
+    let currentLightboxResort = null;
+    let deferredInstallPrompt = null;
+
+    // 全螢幕地圖雙指縮放（Pinch-to-Zoom）與單指拖曳狀態
+    const mapTransform = { scale: 1, x: 0, y: 0 };
+    let gestureState = {
+      isDragging: false,
+      startX: 0,
+      startY: 0,
+      initialDistance: 0,
+      initialScale: 1
+    };
+
+    function applyMapTransform(smooth) {
+      const body = document.getElementById('map-lightbox-body');
+      const label = document.getElementById('zoom-level-label');
+      if (!body) return;
+      body.style.transition = smooth ? 'transform 0.18s ease-out' : 'none';
+      body.style.transform = `translate3d(${mapTransform.x}px, ${mapTransform.y}px, 0) scale(${mapTransform.scale})`;
+      if (label) {
+        label.textContent = Math.round(mapTransform.scale * 100) + '%';
+      }
+    }
+
+    function zoomMapBy(delta) {
+      mapTransform.scale = Math.min(4.5, Math.max(1, +(mapTransform.scale + delta).toFixed(2)));
+      if (mapTransform.scale === 1) {
+        mapTransform.x = 0;
+        mapTransform.y = 0;
+      }
+      applyMapTransform(true);
+    }
+
+    function resetMapZoom() {
+      mapTransform.scale = 1;
+      mapTransform.x = 0;
+      mapTransform.y = 0;
+      applyMapTransform(true);
+    }
+
+    (function initPinchZoomGestures() {
+      const viewport = document.getElementById('map-lightbox-viewport');
+      if (!viewport) return;
+
+      const getDistance = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          gestureState.isDragging = false;
+          gestureState.initialDistance = getDistance(e.touches[0], e.touches[1]);
+          gestureState.initialScale = mapTransform.scale;
+        } else if (e.touches.length === 1 && mapTransform.scale > 1) {
+          gestureState.isDragging = true;
+          gestureState.startX = e.touches[0].clientX - mapTransform.x;
+          gestureState.startY = e.touches[0].clientY - mapTransform.y;
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          const currentDist = getDistance(e.touches[0], e.touches[1]);
+          const ratio = currentDist / (gestureState.initialDistance || 1);
+          mapTransform.scale = Math.min(4.5, Math.max(1, gestureState.initialScale * ratio));
+          if (mapTransform.scale === 1) {
+            mapTransform.x = 0;
+            mapTransform.y = 0;
+          }
+          applyMapTransform(false);
+        } else if (e.touches.length === 1 && gestureState.isDragging && mapTransform.scale > 1) {
+          e.preventDefault();
+          mapTransform.x = e.touches[0].clientX - gestureState.startX;
+          mapTransform.y = e.touches[0].clientY - gestureState.startY;
+          applyMapTransform(false);
+        }
+      }, { passive: false });
+
+      viewport.addEventListener('touchend', () => {
+        gestureState.isDragging = false;
+      });
+
+      // 支援雙擊快速放大 / 還原
+      let lastTap = 0;
+      viewport.addEventListener('touchend', (e) => {
+        if (e.touches.length > 0) return;
+        const now = Date.now();
+        if (now - lastTap < 280) {
+          if (mapTransform.scale > 1) {
+            resetMapZoom();
+          } else {
+            mapTransform.scale = 2.2;
+            applyMapTransform(true);
+          }
+        }
+        lastTap = now;
+      });
+    })();
+
+    // 當尚未上傳實體 WebP 檔或載入失敗時，優雅顯示提示卡片而不報錯
+    function handleWebpFallback(imgEl, resortKey, filename) {
+      const container = imgEl.parentElement;
+      if (!container) return;
+      container.innerHTML = `
+        <div class="p-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-2">
+          <i class="fa-regular fa-file-image text-2xl text-slate-500"></i>
+          <p class="text-xs font-bold text-slate-800">尚未偵測到官方原圖（maps/${filename}）</p>
+          <p class="text-[11px] text-slate-600">請將轉好嘅 WebP 檔放入部署資料夾嘅 <code>maps/${filename}</code>，或先點擊「概覽圖 (SVG)」檢視。</p>
+          <button type="button" onclick="event.stopPropagation(); toggleCardMapMode('${resortKey}', 'svg');" class="min-h-[48px] mt-1 px-4 py-2 rounded-xl bg-sky-700 text-white text-xs font-bold">
+            切回概覽圖 (SVG)
+          </button>
+        </div>
+      `;
+    }
+
+    // 切換雪場卡片的 SVG / WebP 顯示模式
+    function toggleCardMapMode(resortKey, mode) {
+      cardMapModes[resortKey] = mode;
+      const svgView = document.getElementById('view-' + resortKey + '-svg');
+      const webpView = document.getElementById('view-' + resortKey + '-webp');
+      const btnSvg = document.getElementById('mode-btn-' + resortKey + '-svg');
+      const btnWebp = document.getElementById('mode-btn-' + resortKey + '-webp');
+
+      if (!svgView || !webpView || !btnSvg || !btnWebp) return;
+
+      if (mode === 'webp') {
+        svgView.classList.add('hidden');
+        webpView.classList.remove('hidden');
+        btnWebp.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+        btnWebp.classList.remove('text-slate-600');
+        btnSvg.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+        btnSvg.classList.add('text-slate-600');
+      } else {
+        webpView.classList.add('hidden');
+        svgView.classList.remove('hidden');
+        btnSvg.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+        btnSvg.classList.remove('text-slate-600');
+        btnWebp.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+        btnWebp.classList.add('text-slate-600');
+      }
+    }
+
+    function openMapViewer(resortKey) {
+      const config = {
+        madarao: { title: '斑尾高原 × タングラム斑尾 雪道圖', svgId: 'svg-map-madarao', webpSrc: './maps/madarao.webp' },
+        romance: { title: 'スノーリゾートロマンスの神様 雪道圖', svgId: 'svg-map-romance', webpSrc: './maps/romance.webp' },
+        nozawa: { title: '野沢温泉スキー場 2026 雪道圖', svgId: 'svg-map-nozawa', webpSrc: './maps/nozawa.webp' }
+      };
+      const item = config[resortKey];
+      if (!item) return;
+      currentLightboxResort = resortKey;
+      resetMapZoom();
+
+      const mode = cardMapModes[resortKey] || 'svg';
+      document.getElementById('map-lightbox-title').textContent = item.title;
+      document.getElementById('lightbox-toggle-btn').textContent = mode === 'svg' ? '切換 WebP 原圖' : '切換 SVG 概覽';
+
+      const body = document.getElementById('map-lightbox-body');
+      body.innerHTML = '';
+
+      if (mode === 'webp') {
+        const img = document.createElement('img');
+        img.src = item.webpSrc;
+        img.alt = item.title;
+        img.draggable = false;
+        img.className = 'rounded-2xl shadow-2xl max-w-[94vw] max-h-[72vh] object-contain bg-white';
+        img.onerror = function () {
+          toggleCardMapMode(resortKey, 'svg');
+          openMapViewer(resortKey);
+          showToast('尚未偵測到 WebP 原圖，已自動顯示 SVG 概覽圖');
+        };
+        body.appendChild(img);
+      } else {
+        const srcSvg = document.getElementById(item.svgId);
+        if (!srcSvg) return;
+        const clonedSvg = srcSvg.cloneNode(true);
+        clonedSvg.removeAttribute('id');
+        clonedSvg.classList.add('bg-white', 'rounded-2xl', 'p-3', 'shadow-2xl', 'w-[94vw]', 'max-w-2xl');
+        body.appendChild(clonedSvg);
+      }
+
+      document.getElementById('map-lightbox').classList.remove('hidden');
+    }
+
+    function toggleLightboxMode() {
+      if (!currentLightboxResort) return;
+      const nextMode = (cardMapModes[currentLightboxResort] || 'svg') === 'svg' ? 'webp' : 'svg';
+      toggleCardMapMode(currentLightboxResort, nextMode);
+      openMapViewer(currentLightboxResort);
+    }
+
+    function closeMapViewer() {
+      document.getElementById('map-lightbox').classList.add('hidden');
+      resetMapZoom();
+      currentLightboxResort = null;
+    }
+
+    // 分頁切換（支援 ARIA 與 localStorage 記憶）
+    function switchTab(tab) {
+      const panels = ['flight', 'route', 'hotel', 'skimap', 'local'];
+      panels.forEach((p) => {
+        const panelEl = document.getElementById('panel-' + p);
+        const tabEl = document.getElementById('tab-' + p);
+        if (!panelEl || !tabEl) return;
+
+        if (p === tab) {
+          panelEl.classList.remove('hidden');
+          tabEl.classList.add('bg-snow-900', 'text-white', 'shadow-sm');
+          tabEl.classList.remove('text-slate-600', 'hover:bg-slate-100');
+          tabEl.setAttribute('aria-selected', 'true');
+        } else {
+          panelEl.classList.add('hidden');
+          tabEl.classList.remove('bg-snow-900', 'text-white', 'shadow-sm');
+          tabEl.classList.add('text-slate-600', 'hover:bg-slate-100');
+          tabEl.setAttribute('aria-selected', 'false');
+        }
+      });
+
+      try {
+        localStorage.setItem('madarao_2027_last_tab', tab);
+      } catch (e) {}
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 輕量 localStorage：我的分車記憶
+    function selectMyCar(carName) {
+      try {
+        localStorage.setItem('madarao_2027_my_car', carName);
+      } catch (e) {}
+      renderMyCar(carName);
+      showToast('已記住你的車輛：' + carName);
+    }
+
+    function renderMyCar(carName) {
+      const badge = document.getElementById('selected-car-badge');
+      if (badge) {
+        badge.textContent = carName ? '已選：' + carName : '未選擇';
+      }
+      document.querySelectorAll('.car-select-btn').forEach((btn) => {
+        if (btn.id === 'car-btn-' + carName) {
+          btn.classList.add('bg-snow-900', 'text-white', 'border-snow-900', 'shadow-sm');
+          btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+        } else {
+          btn.classList.remove('bg-snow-900', 'text-white', 'border-snow-900', 'shadow-sm');
+          btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+        }
+      });
+    }
+
+    // 輕量 localStorage：我的房間置頂記憶
+    function setMyRoom(roomLabel) {
+      try {
+        localStorage.setItem('madarao_2027_my_room', roomLabel);
+      } catch (e) {}
+      renderMyRoom(roomLabel);
+      showToast('已置頂你的房間：' + roomLabel);
+    }
+
+    function clearMyRoom() {
+      try {
+        localStorage.removeItem('madarao_2027_my_room');
+      } catch (e) {}
+      renderMyRoom(null);
+      showToast('已取消房間置頂');
+    }
+
+    function renderMyRoom(roomLabel) {
+      const banner = document.getElementById('my-room-banner');
+      const title = document.getElementById('my-room-title');
+      if (banner && title) {
+        if (roomLabel) {
+          title.textContent = roomLabel;
+          banner.classList.remove('hidden');
+        } else {
+          banner.classList.add('hidden');
+        }
+      }
+
+      document.querySelectorAll('.room-item').forEach((row) => {
+        const icon = row.querySelector('i');
+        if (!icon) return;
+        if (row.dataset.room === roomLabel) {
+          icon.classList.remove('fa-regular', 'text-slate-600');
+          icon.classList.add('fa-solid', 'text-amber-500');
+        } else {
+          icon.classList.add('fa-regular', 'text-slate-600');
+          icon.classList.remove('fa-solid', 'text-amber-500');
+        }
+      });
+    }
+
+    // 複製文字與 Toast 提示
+    function copyText(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('已複製：' + text);
+      } catch (err) {
+        showToast('複製失敗，請手動選取');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2200);
+    }
+
+    // PWA 安裝提示與圖示初始化
+    function handleInstallAction() {
+      if (deferredInstallPrompt) {
+        triggerNativeInstall();
+      } else {
+        document.getElementById('install-modal').classList.remove('hidden');
+      }
+    }
+
+    function closeInstallModal() {
+      document.getElementById('install-modal').classList.add('hidden');
+    }
+
+    async function triggerNativeInstall() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        showToast('已開始安裝「斑尾滑雪 27」');
+        closeInstallModal();
+      }
+      deferredInstallPrompt = null;
+    }
+
+    // 初始化 App 圖示 Data URI（供下載及預覽）、Service Worker 與還原狀態
+    (function initPwaAndState() {
+      // 生成 512x512 PNG 圖示供下載與 iOS 預覽
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const grad = ctx.createLinearGradient(0, 0, 512, 512);
+          grad.addColorStop(0, '#0f294a');
+          grad.addColorStop(0.55, '#1d4ed8');
+          grad.addColorStop(1, '#38bdf8');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 512, 512);
+
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.beginPath();
+          ctx.arc(380, 115, 55, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#bae6fd';
+          ctx.beginPath();
+          ctx.moveTo(-20, 410);
+          ctx.lineTo(155, 195);
+          ctx.lineTo(310, 360);
+          ctx.lineTo(395, 235);
+          ctx.lineTo(532, 410);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(40, 420);
+          ctx.lineTo(256, 145);
+          ctx.lineTo(472, 420);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#0f294a';
+          ctx.fillRect(0, 395, 512, 117);
+
+          ctx.fillStyle = '#e11d48';
+          ctx.fillRect(54, 54, 68, 68);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(54, 54, 68, 68);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 38px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('雪', 88, 101);
+
+          ctx.font = 'bold 42px sans-serif';
+          ctx.fillText('斑尾滑雪 27', 256, 466);
+
+          const pngUrl = canvas.toDataURL('image/png');
+          const dlBtn = document.getElementById('download-icon-btn');
+          const modalIcon = document.getElementById('modal-app-icon');
+          const headerIcon = document.getElementById('header-app-icon');
+          if (dlBtn) dlBtn.href = pngUrl;
+          if (modalIcon) modalIcon.src = pngUrl;
+          if (headerIcon) headerIcon.src = pngUrl;
+        }
+      } catch (e) {}
+
+      // 若已於 Standalone 模式開啟則自動隱藏頂部安裝鈕
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (isStandalone) {
+        const installBtn = document.getElementById('header-install-btn');
+        if (installBtn) installBtn.classList.add('hidden');
+      }
+
+      // 監聽 Android Chrome 原生安裝事件
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        const promptBox = document.getElementById('native-prompt-box');
+        const btnText = document.getElementById('header-install-text');
+        if (promptBox) promptBox.classList.remove('hidden');
+        if (btnText) btnText.textContent = '一鍵安裝 App';
+      });
+
+      // 註冊同源實體 Service Worker（適用於 Netlify / Firebase / Google AI Studio 部署）
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+
+      // 還原 localStorage 記憶狀態
+      try {
+        const savedCar = localStorage.getItem('madarao_2027_my_car');
+        if (savedCar) renderMyCar(savedCar);
+
+        const savedRoom = localStorage.getItem('madarao_2027_my_room');
+        if (savedRoom) renderMyRoom(savedRoom);
+
+        const savedTab = localStorage.getItem('madarao_2027_last_tab');
+        if (savedTab && ['flight', 'route', 'hotel', 'skimap', 'local'].includes(savedTab)) {
+          switchTab(savedTab);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

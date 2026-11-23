@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans TC", "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Shippori Mincho", "Songti TC", "Yu Mincho", Georgia, serif;
+
+  --color-snow-50: #f8fbff;
+  --color-snow-100: #eef6ff;
+  --color-snow-200: #d9ebff;
+  --color-snow-300: #b8daff;
+  --color-snow-500: #3b82f6;
+  --color-snow-700: #1d4ed8;
+  --color-snow-800: #1e3a8a;
+  --color-snow-900: #0f294a;
+}
+
+html {
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y;
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 30%, #f1f5f9 100%);
+  color: #1e293b;
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+
+.safe-top-header {
+  padding-top: calc(3.25rem + env(safe-area-inset-top));
+}
+
+@media (display-mode: standalone) {
+  .safe-top-header {
+    padding-top: calc(1.25rem + env(safe-area-inset-top));
+  }
+}
+
+.fluid-title {
+  font-size: clamp(1.35rem, 6vw, 1.85rem);
+  line-height: 1.25;
+}
+
+.fluid-subtitle {
+  font-size: clamp(0.9rem, 4vw, 1.15rem);
+}
+
+.fluid-time {
+  font-size: clamp(1.35rem, 5.8vw, 1.65rem);
+}
+
+.safe-bottom-nav {
+  padding-bottom: calc(0.45rem + env(safe-area-inset-bottom));
+}
+
+.jp-pattern-subtle {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(circle at 100% 150%, #ffffff 24%, #f1f5f9 25%, #f1f5f9 28%, #ffffff 29%, #ffffff 36%, #f1f5f9 36%, #f1f5f9 40%, transparent 40%, transparent),
+    radial-gradient(circle at 0 150%, #ffffff 24%, #f1f5f9 25%, #f1f5f9 28%, #ffffff 29%, #ffffff 36%, #f1f5f9 36%, #f1f5f9 40%, transparent 40%, transparent),
+    radial-gradient(circle at 50% 100%, #f1f5f9 10%, #ffffff 11%, #ffffff 23%, #f1f5f9 24%, #f1f5f9 30%, #ffffff 31%, #ffffff 43%, #f1f5f9 44%, #f1f5f9 50%, #ffffff 51%, #ffffff 63%, #f1f5f9 64%, #f1f5f9 71%, transparent 71%, transparent);
+  background-size: 44px 22px;
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10px) translateX(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(230px) translateX(18px);
+    opacity: 0;
+  }
+}
+
+.snowflake {
+  position: absolute;
+  top: -10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  pointer-events: none;
+  animation: snowfall linear infinite;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 25px -5px rgba(15, 41, 74, 0.05), 0 4px 10px -2px rgba(15, 41, 74, 0.03);
+}
+
+.nav-btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-btn:active {
+  transform: scale(0.97);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
