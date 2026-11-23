@@ -1,8 +1,15 @@
 import React from 'react';
 import {Clock, CornerUpRight} from 'lucide-react';
+import {LocalSpotsExplorer} from './LocalSpotsExplorer';
+import {OfflineDistanceTool} from './OfflineDistanceTool';
 import {LocalDriveSvg} from './SkiMapSvgs';
 
-export const LocalTab: React.FC = () => {
+interface LocalTabProps {
+  isOnline: boolean;
+  onCopyText: (text: string) => void;
+}
+
+export const LocalTab: React.FC<LocalTabProps> = ({isOnline, onCopyText}) => {
   return (
     <section
       id="panel-local"
@@ -28,7 +35,7 @@ export const LocalTab: React.FC = () => {
         </div>
       </div>
 
-      {/* 路線 1：酒店 -> 飯山市區 */}
+      {/* 路線 1：酒店 -> 飯山市區（置頂主力導航） */}
       <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-1.5">
           <span className="ui-pill text-sky-800 bg-sky-100">
@@ -50,7 +57,7 @@ export const LocalTab: React.FC = () => {
         <p className="text-sm text-slate-700 leading-relaxed">
           由斑尾高原落山最近嘅市中心！有大型超市（
           <strong>Tsuruya ツルヤ 飯山店</strong>
-          ）、藥妝店、居酒屋、拉麵店及便利店，晚上想出市區買啤酒零食或食宵夜最方便。
+          ）、站內餐廳與手信店、藥妝店、居酒屋、拉麵店及便利店，晚上想出市區買啤酒零食或食宵夜最方便。
         </p>
         <a
           href="https://www.google.com/maps/dir/?api=1&destination=Iiyama+Station+Nagano&travelmode=driving"
@@ -137,6 +144,12 @@ export const LocalTab: React.FC = () => {
           <span>一鍵導航去 野沢温泉スキー場</span>
         </a>
       </div>
+
+      {/* 周邊地標分類篩選（溫泉／餐廳／超商與店鋪／景點）＋ 離線資料與 Google Maps 即時查詢 */}
+      <LocalSpotsExplorer isOnline={isOnline} onCopyText={onCopyText} />
+
+      {/* 離線版地標距離、雪地車程與耗油量查詢工具 */}
+      <OfflineDistanceTool />
     </section>
   );
 };

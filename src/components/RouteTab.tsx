@@ -296,6 +296,68 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           </div>
         </div>
 
+        {/* 第 4 站：Maple House Backpackers（拯救金金大行洞） */}
+        <div className="relative glass-card rounded-3xl p-4 sm:p-5 border-2 border-rose-300/90 overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-3 -right-2 font-serif text-7xl font-bold text-rose-50 pointer-events-none select-none"
+          >
+            04
+          </div>
+          <span className="absolute -left-[34px] top-6 w-4 h-4 rounded-full bg-rose-600 ring-4 ring-white shadow" />
+          <div className="relative">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span className="ui-pill text-rose-900 bg-rose-100 border border-rose-200">
+                ★ 第 4 站 · 拯救金金大行洞
+              </span>
+              <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1">
+                <Car className="w-3.5 h-3.5 text-rose-600" aria-hidden="true" />
+                <span>上段約 41km / 約 35m</span>
+              </span>
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mt-2">
+              Maple House Backpackers
+            </h3>
+            <p className="text-xs text-slate-600 font-medium">
+              日文地址對照：長野県飯山市斑尾高原 1101-66（豊田飯山IC出口 ➔ 斑尾高原）
+            </p>
+            <div className="mt-2.5 bg-rose-50/90 border border-rose-200 rounded-xl px-3 py-2 text-xs text-rose-950 flex items-start gap-1.5">
+              <AlertTriangle
+                className="w-4 h-4 text-rose-600 shrink-0 mt-0.5"
+                aria-hidden="true"
+              />
+              <span>
+                <strong>備註：拯救金金大行洞！</strong>入酒店 Check-in
+                前先順路去 Maple House Backpackers 執行拯救任務，匯合上車後再開約
+                3 分鐘即達酒店。
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onCopyText('長野県飯山市斑尾高原 1101-66')}
+                aria-label="複製 Maple House Backpackers 日文地址"
+                className="min-h-[48px] text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 transition inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5 text-rose-600" aria-hidden="true" />
+                <span>複製日文地址</span>
+              </button>
+            </div>
+            <div className="mt-3.5">
+              <a
+                href="https://www.google.com/maps/dir/?api=1&destination=Maple+House+Backpackers+Madarao+1101-66+Iiyama+Nagano&travelmode=driving"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="一鍵導航去第 4 站 Maple House Backpackers（拯救金金大行洞）"
+                className="nav-btn min-h-[48px] w-full inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold py-3 px-4 rounded-2xl shadow-sm"
+              >
+                <CornerUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>一鍵導航去 第 4 站：Maple House Backpackers</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* 終點：ホテルシルクイン斑尾 */}
         <div className="relative glass-card jp-pattern-subtle rounded-3xl p-4 sm:p-5 border-2 border-snow-800/30 overflow-hidden">
           <div
@@ -308,22 +370,22 @@ export const RouteTab: React.FC<RouteTabProps> = ({
           <div className="relative">
             <div className="flex flex-wrap items-center justify-between gap-1.5">
               <span className="ui-pill text-white bg-snow-900">
-                終點 · 預計 17:00 – 17:15 抵達
+                終點 · 預計 17:15 – 17:25 抵達
               </span>
               <span className="text-xs font-medium text-slate-600 inline-flex items-center gap-1">
                 <Car className="w-3.5 h-3.5 text-snow-700" aria-hidden="true" />
-                <span>上段 40.6km / 約 35m</span>
+                <span>上段約 1km / 約 3m</span>
               </span>
             </div>
             <h3 className="text-lg font-bold text-slate-900 mt-2">
               倉本温泉 ホテルシルクイン斑尾
             </h3>
             <p className="text-xs text-slate-600 font-medium">
-              日文路牌對照：豊田飯山IC出口 ➔ 斑尾高原方面
+              日文路牌對照：斑尾高原內行車約 3 分鐘即達
             </p>
             <p className="text-sm text-slate-700 mt-2 leading-relaxed">
-              由豐田飯山 IC 落高速後行約 25
-              分鐘雪地山路上山即達！酒店門口有
+              完成拯救金金任務後沿斑尾高原主路開約 3
+              分鐘即達！酒店門口有
               <strong>免費住客停車場</strong>，落行李辦理 Check-in
               後就食得酒店自助晚餐。
             </p>

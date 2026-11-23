@@ -61,7 +61,7 @@ export const HighwayRouteSvg: React.FC = () => (
     </g>
 
     <path
-      d="M 48 232 C 100 232, 125 202, 175 192 C 235 180, 275 162, 265 130 C 255 100, 175 105, 135 76 C 105 54, 155 34, 232 34"
+      d="M 48 232 C 100 232, 125 202, 175 192 C 235 180, 275 162, 265 130 C 255 100, 175 105, 135 76 C 118 56, 152 49, 186 44 C 206 41, 224 34, 242 30"
       fill="none"
       stroke="#bae6fd"
       strokeWidth="11"
@@ -69,7 +69,7 @@ export const HighwayRouteSvg: React.FC = () => (
       opacity="0.5"
     />
     <path
-      d="M 48 232 C 100 232, 125 202, 175 192 C 235 180, 275 162, 265 130 C 255 100, 175 105, 135 76 C 105 54, 155 34, 232 34"
+      d="M 48 232 C 100 232, 125 202, 175 192 C 235 180, 275 162, 265 130 C 255 100, 175 105, 135 76 C 118 56, 152 49, 186 44 C 206 41, 224 34, 242 30"
       fill="none"
       stroke="url(#roadGrad)"
       strokeWidth="4.5"
@@ -141,8 +141,8 @@ export const HighwayRouteSvg: React.FC = () => (
     </text>
 
     <rect
-      x="116"
-      y="12"
+      x="72"
+      y="20"
       width="72"
       height="16"
       rx="8"
@@ -151,14 +151,14 @@ export const HighwayRouteSvg: React.FC = () => (
       strokeWidth="1"
     />
     <text
-      x="152"
-      y="23"
+      x="108"
+      y="31"
       textAnchor="middle"
       fontSize="8.5"
       fontWeight="bold"
       fill="#0f294a"
     >
-      40.6km · 35m
+      41km · 35m
     </text>
 
     <g filter="url(#nodeShadow)">
@@ -247,26 +247,50 @@ export const HighwayRouteSvg: React.FC = () => (
     </g>
 
     <g filter="url(#nodeShadow)">
-      <circle cx="232" cy="34" r="9.5" fill="#0f294a" stroke="#ffffff" strokeWidth="2.5" />
+      <circle cx="186" cy="44" r="8" fill="#e11d48" stroke="#ffffff" strokeWidth="2.5" />
       <text
-        x="295"
-        y="32"
+        x="194"
+        y="66"
         textAnchor="middle"
-        fontSize="10.5"
+        fontSize="9.5"
+        fontWeight="bold"
+        fill="#be123c"
+      >
+        ④ Maple House
+      </text>
+      <text
+        x="194"
+        y="77"
+        textAnchor="middle"
+        fontSize="8"
+        fontWeight="bold"
+        fill="#e11d48"
+      >
+        拯救金金大行洞
+      </text>
+    </g>
+
+    <g filter="url(#nodeShadow)">
+      <circle cx="242" cy="30" r="9.5" fill="#0f294a" stroke="#ffffff" strokeWidth="2.5" />
+      <text
+        x="301"
+        y="28"
+        textAnchor="middle"
+        fontSize="10"
         fontWeight="bold"
         fill="#0f294a"
       >
         ホテルシルクイン斑尾
       </text>
       <text
-        x="295"
-        y="44"
+        x="301"
+        y="40"
         textAnchor="middle"
         fontSize="8.5"
         fontWeight="bold"
         fill="#0284c7"
       >
-        17:00 – 17:15 抵達
+        17:15 – 17:25 抵達
       </text>
     </g>
   </svg>

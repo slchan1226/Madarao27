@@ -155,8 +155,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Only intercept same-origin app shell & trail map requests
+  // Only intercept same-origin app shell & trail map requests (never /api/* routes)
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/')) return;
 
   // Navigation requests: Cache-First / Stale-While-Revalidate with offline index.html fallback
   if (request.mode === 'navigate') {

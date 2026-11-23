@@ -1,6 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {
   AlertTriangle,
+  ChevronDown,
   Clock,
   Cloud,
   CloudFog,
@@ -117,6 +118,7 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
 }) => {
   const [selectedResortId, setSelectedResortId] =
     useState<WeatherResortId>('madarao');
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   const activeResort = useMemo(
     () =>
@@ -670,106 +672,131 @@ export const WeatherTab: React.FC<WeatherTabProps> = ({
         </div>
       )}
 
-      {/* 頂部橫幅天氣主題與日夜效果預覽器 */}
-      <div className="glass-card rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
+      {/* 頂部橫幅天氣主題與日夜效果預覽器（預設收起，點擊展開） */}
+      <div className="glass-card rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsPreviewOpen((prev) => !prev)}
+          aria-expanded={isPreviewOpen}
+          aria-controls="banner-theme-preview-panel"
+          className="w-full min-h-[48px] px-4 py-3 sm:px-5 flex items-center justify-between gap-2 text-left hover:bg-slate-50/70 transition cursor-pointer"
+        >
+          <div className="flex items-center gap-1.5 min-w-0">
             <Palette
               className="w-4 h-4 text-sky-700 shrink-0"
               aria-hidden="true"
             />
-            <h3 className="font-serif text-base font-bold text-snow-900">
+            <span className="font-serif text-sm sm:text-base font-bold text-snow-900 truncate">
               頂部橫幅天氣主題預覽
-            </h3>
+            </span>
           </div>
-          <span className="ui-pill bg-sky-50 text-sky-900 border border-sky-200">
-            {previewTheme === null && previewPeriod === null
-              ? `自動：${BANNER_THEME_LABELS[activeBannerTheme]}（${activeIsDay ? '日間' : '夜間'}）`
-              : `預覽：${BANNER_THEME_LABELS[activeBannerTheme]}（${activeIsDay ? '日間' : '夜間'}）`}
-          </span>
-        </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="ui-pill bg-sky-50 text-sky-900 border border-sky-200">
+              {previewTheme === null && previewPeriod === null
+                ? `自動：${BANNER_THEME_LABELS[activeBannerTheme]}（${activeIsDay ? '日間' : '夜間'}）`
+                : `預覽：${BANNER_THEME_LABELS[activeBannerTheme]}（${activeIsDay ? '日間' : '夜間'}）`}
+            </span>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${
+                isPreviewOpen ? 'rotate-180' : ''
+              }`}
+              aria-hidden="true"
+            />
+          </div>
+        </button>
 
-        <p className="text-[11px] text-slate-600 leading-relaxed">
-          平時按斑尾高原即時天氣與日本時間自動切換（斑尾現時{' '}
-          <strong className="text-slate-800">JST {formatJapanTimeNow()}</strong>
-          ，06:00–18:00 為日間）；撳下面掣可即時試睇 5 種天氣同日夜氛圍：
-        </p>
-
-        <div
-          className="flex flex-wrap gap-1.5"
-          role="group"
-          aria-label="選擇頂部橫幅天氣主題預覽"
-        >
-          <button
-            type="button"
-            onClick={() => {
-              onSelectPreviewTheme(null);
-              onSelectPreviewPeriod(null);
-            }}
-            aria-pressed={previewTheme === null && previewPeriod === null}
-            className={`ui-pill cursor-pointer border transition ${
-              previewTheme === null && previewPeriod === null
-                ? 'bg-snow-900 text-white border-snow-900 shadow-xs'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-            }`}
+        {isPreviewOpen && (
+          <div
+            id="banner-theme-preview-panel"
+            className="px-4 pb-4 pt-1 sm:px-5 sm:pb-5 border-t border-slate-100 space-y-3"
           >
-            自動（即時）
-          </button>
+            <p className="text-[11px] text-slate-600 leading-relaxed pt-2">
+              平時按斑尾高原即時天氣與日本時間自動切換（斑尾現時{' '}
+              <strong className="text-slate-800">JST {formatJapanTimeNow()}</strong>
+              ，06:00–18:00 為日間）；撳下面掣可即時試睇 5 種天氣同日夜氛圍：
+            </p>
 
-          {PREVIEW_THEME_OPTIONS.map((opt) => {
-            const isActive = previewTheme === opt.id;
-            return (
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label="選擇頂部橫幅天氣主題預覽"
+            >
               <button
-                key={opt.id}
                 type="button"
-                onClick={() => onSelectPreviewTheme(opt.id)}
-                aria-pressed={isActive}
+                onClick={() => {
+                  onSelectPreviewTheme(null);
+                  onSelectPreviewPeriod(null);
+                }}
+                aria-pressed={previewTheme === null && previewPeriod === null}
                 className={`ui-pill cursor-pointer border transition ${
-                  isActive
-                    ? 'bg-sky-700 text-white border-sky-700 shadow-xs'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-sky-50'
+                  previewTheme === null && previewPeriod === null
+                    ? 'bg-snow-900 text-white border-snow-900 shadow-xs'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                {opt.label}
+                自動（即時）
               </button>
-            );
-          })}
-        </div>
 
-        {/* 日夜微調切換 */}
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
-          <span className="text-[11px] font-bold text-slate-600">
-            日夜微調測試
-          </span>
-          <div className="flex items-center gap-1.5" role="group" aria-label="切換日夜預覽">
-            <button
-              type="button"
-              onClick={() => onSelectPreviewPeriod('day')}
-              aria-pressed={previewPeriod === 'day'}
-              className={`ui-pill cursor-pointer border transition ${
-                previewPeriod === 'day'
-                  ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
-              }`}
-            >
-              <Sun className="w-3 h-3 shrink-0" aria-hidden="true" />
-              <span>日間</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onSelectPreviewPeriod('night')}
-              aria-pressed={previewPeriod === 'night'}
-              className={`ui-pill cursor-pointer border transition ${
-                previewPeriod === 'night'
-                  ? 'bg-slate-800 text-white border-slate-800'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              <Moon className="w-3 h-3 shrink-0" aria-hidden="true" />
-              <span>夜間</span>
-            </button>
+              {PREVIEW_THEME_OPTIONS.map((opt) => {
+                const isActive = previewTheme === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onSelectPreviewTheme(opt.id)}
+                    aria-pressed={isActive}
+                    className={`ui-pill cursor-pointer border transition ${
+                      isActive
+                        ? 'bg-sky-700 text-white border-sky-700 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-sky-50'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 日夜微調切換 */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-600">
+                日夜微調測試
+              </span>
+              <div
+                className="flex items-center gap-1.5"
+                role="group"
+                aria-label="切換日夜預覽"
+              >
+                <button
+                  type="button"
+                  onClick={() => onSelectPreviewPeriod('day')}
+                  aria-pressed={previewPeriod === 'day'}
+                  className={`ui-pill cursor-pointer border transition ${
+                    previewPeriod === 'day'
+                      ? 'bg-amber-500 text-white border-amber-500'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
+                  }`}
+                >
+                  <Sun className="w-3 h-3 shrink-0" aria-hidden="true" />
+                  <span>日間</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectPreviewPeriod('night')}
+                  aria-pressed={previewPeriod === 'night'}
+                  className={`ui-pill cursor-pointer border transition ${
+                    previewPeriod === 'night'
+                      ? 'bg-slate-800 text-white border-slate-800'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <Moon className="w-3 h-3 shrink-0" aria-hidden="true" />
+                  <span>夜間</span>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

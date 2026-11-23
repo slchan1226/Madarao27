@@ -108,6 +108,7 @@ export default function App() {
     null,
   );
   const [previewPeriod, setPreviewPeriod] = useState<DayPeriod | null>(null);
+  const [gmpQuotaExceeded, setGmpQuotaExceeded] = useState<boolean>(false);
 
   const [toastMessage, setToastMessage] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
@@ -149,6 +150,14 @@ export default function App() {
     activeBannerTheme,
     activeIsDay,
   );
+
+  useEffect(() => {
+    const handleQuotaExceeded = () => setGmpQuotaExceeded(true);
+    window.addEventListener('gmp-quota-exceeded', handleQuotaExceeded);
+    return () => {
+      window.removeEventListener('gmp-quota-exceeded', handleQuotaExceeded);
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -324,6 +333,22 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {gmpQuotaExceeded && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
+          <span>
+            Google Maps Platform quota reached. If you are the app owner, visit{' '}
+            <a
+              href="https://developers.google.com/maps/ai/ai-studio?utm_campaign=gmp_mcp_codeassist_v1_aistudio#quota_exceeded_errors"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline font-semibold text-amber-950 hover:text-amber-800"
+            >
+              maps developer site
+            </a>{' '}
+            for instructions to update your account.
+          </span>
+        </div>
+      )}
       <div ref={scrollContainerRef} className="app-scroll-area">
         {/* 頂部日系雪山主題橫幅（依斑尾高原即時天氣與日夜自動切換主題） */}
         <header
@@ -521,7 +546,9 @@ export default function App() {
               }}
             />
           )}
-          {activeTab === 'local' && <LocalTab />}
+          {activeTab === 'local' && (
+            <LocalTab isOnline={isOnline} onCopyText={handleCopyText} />
+          )}
         </main>
       </div>
 
