@@ -16,6 +16,7 @@ import {
   Smartphone,
   Wifi,
 } from 'lucide-react';
+import {CountdownWidget} from './components/CountdownWidget';
 import {FlightTab} from './components/FlightTab';
 import {GuideModal} from './components/GuideModal';
 import {HotelTab} from './components/HotelTab';
@@ -95,6 +96,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const toastTimerRef = useRef<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const {canNativeInstall, isInstalled, triggerNativeInstall} = usePWAInstall();
   const isOnline = useOnlineStatus();
@@ -125,7 +127,11 @@ export default function App() {
     } catch {
       // Ignore storage access errors
     }
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({top: 0, behavior: 'smooth'});
+    } else {
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
   }, []);
 
   const handleSelectCar = useCallback(
@@ -279,9 +285,10 @@ export default function App() {
   ];
 
   return (
-    <>
-      {/* 頂部日系雪山主題橫幅 */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-snow-900 via-[#153e75] to-sky-700 text-white shadow-lg safe-top-header">
+    <div className="app-shell">
+      <div ref={scrollContainerRef} className="app-scroll-area">
+        {/* 頂部日系雪山主題橫幅 */}
+        <header className="relative overflow-hidden bg-gradient-to-br from-snow-900 via-[#153e75] to-sky-700 text-white shadow-lg safe-top-header">
         <div
           aria-hidden="true"
           className="inset-0 absolute overflow-hidden pointer-events-none"
@@ -414,12 +421,12 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-2.5">
             <div className="min-w-0 flex-1">
               <h1 className="font-serif fluid-title font-bold tracking-wide drop-shadow-sm">
                 斑尾高原滑雪之旅
               </h1>
-              <p className="text-sky-200 fluid-subtitle font-sans font-semibold mt-0.5 truncate">
+              <p className="text-sky-200 fluid-subtitle font-sans font-semibold mt-0.5 leading-snug">
                 Madarao Kogen Snowboard Trip
               </p>
             </div>
@@ -465,44 +472,48 @@ export default function App() {
         </div>
       </header>
 
-      {/* 山區訊號中斷時自動顯示的輕量離線提示 */}
-      <OfflineBanner isOnline={isOnline} />
+        {/* 山區訊號中斷時自動顯示的輕量離線提示 */}
+        <OfflineBanner isOnline={isOnline} />
 
-      {/* 主內容容器 */}
-      <main className="w-full max-w-xl mx-auto px-3.5 sm:px-4 pt-4 space-y-6">
-        {activeTab === 'flight' && <FlightTab onNavigateTab={switchTab} />}
-        {activeTab === 'route' && (
-          <RouteTab
-            myCar={myCar}
-            onSelectCar={handleSelectCar}
-            onCopyText={handleCopyText}
-          />
-        )}
-        {activeTab === 'hotel' && (
-          <HotelTab
-            myRoom={myRoom}
-            onSetRoom={handleSetRoom}
-            onClearRoom={handleClearRoom}
-            onCopyText={handleCopyText}
-          />
-        )}
-        {activeTab === 'skimap' && (
-          <SkiMapTab
-            cardMapModes={cardMapModes}
-            onToggleMode={handleToggleCardMapMode}
-            onOpenViewer={(resort) => setLightboxResort(resort)}
-          />
-        )}
-        {activeTab === 'weather' && (
-          <WeatherTab isOnline={isOnline} onShowToast={showToast} />
-        )}
-        {activeTab === 'local' && <LocalTab />}
-      </main>
+        {/* 出發倒數小工具（純本機時間計算，離線一樣準確） */}
+        <CountdownWidget />
 
-      {/* 底部原生 PWA 固定導航欄 */}
+        {/* 主內容容器 */}
+        <main className="w-full max-w-xl mx-auto px-3.5 sm:px-4 pt-3 pb-5 space-y-5">
+          {activeTab === 'flight' && <FlightTab onNavigateTab={switchTab} />}
+          {activeTab === 'route' && (
+            <RouteTab
+              myCar={myCar}
+              onSelectCar={handleSelectCar}
+              onCopyText={handleCopyText}
+            />
+          )}
+          {activeTab === 'hotel' && (
+            <HotelTab
+              myRoom={myRoom}
+              onSetRoom={handleSetRoom}
+              onClearRoom={handleClearRoom}
+              onCopyText={handleCopyText}
+            />
+          )}
+          {activeTab === 'skimap' && (
+            <SkiMapTab
+              cardMapModes={cardMapModes}
+              onToggleMode={handleToggleCardMapMode}
+              onOpenViewer={(resort) => setLightboxResort(resort)}
+            />
+          )}
+          {activeTab === 'weather' && (
+            <WeatherTab isOnline={isOnline} onShowToast={showToast} />
+          )}
+          {activeTab === 'local' && <LocalTab />}
+        </main>
+      </div>
+
+      {/* 底部原生 PWA 固定導航欄（鎖定於視窗最底，不會被捲動超過或裁切） */}
       <nav
         aria-label="主要行程導航"
-        className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(15,41,74,0.06)] safe-bottom-nav"
+        className="shrink-0 relative z-40 w-full bg-white/95 backdrop-blur-lg border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(15,41,74,0.06)] safe-bottom-nav"
       >
         <div
           role="tablist"
@@ -520,14 +531,14 @@ export default function App() {
                 aria-controls={`panel-${item.id}`}
                 aria-label={item.ariaLabel}
                 onClick={() => switchTab(item.id)}
-                className={`min-h-[48px] min-w-0 flex flex-col items-center justify-center py-1.5 px-0.5 sm:px-1 rounded-xl transition cursor-pointer ${
+                className={`min-h-[48px] min-w-0 flex flex-col items-center justify-center py-1 px-0.5 sm:px-1 rounded-xl transition cursor-pointer ${
                   isSelected
                     ? 'bg-snow-900 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 {item.icon}
-                <span className="text-[10px] sm:text-[11px] font-bold tracking-tight whitespace-nowrap leading-tight">
+                <span className="text-[10px] sm:text-[11px] font-bold tracking-tighter sm:tracking-tight whitespace-nowrap leading-tight">
                   {item.label}
                 </span>
               </button>
@@ -557,7 +568,7 @@ export default function App() {
         id="toast"
         role="status"
         aria-live="polite"
-        className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap ${
+        className={`fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg pointer-events-none transition-opacity duration-200 whitespace-nowrap ${
           toastVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -572,6 +583,6 @@ export default function App() {
         onFallbackToSvg={handleLightboxWebpFallback}
         onClose={() => setLightboxResort(null)}
       />
-    </>
+    </div>
   );
 }

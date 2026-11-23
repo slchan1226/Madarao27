@@ -30,7 +30,7 @@ export const LocalTab: React.FC = () => {
 
       {/* 路線 1：酒店 -> 飯山市區 */}
       <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
           <span className="text-xs font-bold text-sky-800 bg-sky-100 px-2.5 py-1 rounded-full">
             路線 01 · 距離約 13 km
           </span>
@@ -66,7 +66,7 @@ export const LocalTab: React.FC = () => {
 
       {/* 路線 2：酒店 -> スノーリゾートロマンスの神様 */}
       <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
           <span className="text-xs font-bold text-rose-800 bg-rose-100 px-2.5 py-1 rounded-full">
             路線 02 · 距離約 20 km
           </span>
@@ -101,7 +101,7 @@ export const LocalTab: React.FC = () => {
 
       {/* 路線 3：酒店 -> 野沢温泉スキー場 */}
       <div className="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
           <span className="text-xs font-bold text-white bg-snow-900 px-2.5 py-1 rounded-full">
             路線 03 · 距離約 26 km
           </span>
