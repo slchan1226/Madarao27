@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import {defineConfig} from 'vite';
@@ -7,6 +8,12 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     base: './',
+    build: {
+      target: 'es2020',
+      sourcemap: false,
+      cssMinify: true,
+      reportCompressedSize: true,
+    },
     plugins: [
       react(),
       tailwindcss(),
@@ -28,9 +35,10 @@ export default defineConfig(() => {
           }
         },
       },
-      // Prepares clean static PWA output in dist/:
+      // Prepares clean static PWA output in dist/ for Render Static Site hosting:
       // 1) Removes unoptimized raw upload attachments from dist/assets/aistudio
       // 2) Injects compiled ./assets/*.js and ./assets/*.css into dist/sw.js precache list
+      // 3) Stamps a deterministic build hash into dist/sw.js CACHE_NAME for instant cache updates on redeploy
       {
         name: 'finalize-pwa-static-bundle',
         apply: 'build',
@@ -47,17 +55,28 @@ export default defineConfig(() => {
           const swPath = path.join(distDir, 'sw.js');
           const assetsDir = path.join(distDir, 'assets');
           if (fs.existsSync(swPath) && fs.existsSync(assetsDir)) {
-            const compiledAssets = fs
+            const assetFiles = fs
               .readdirSync(assetsDir)
               .filter((file) => /\.(js|css|woff2?)$/i.test(file))
+              .sort();
+
+            const compiledAssets = assetFiles
               .map((file) => `,\n  './assets/${file}'`)
               .join('');
 
+            const buildHash = crypto
+              .createHash('sha256')
+              .update(assetFiles.join('|'))
+              .digest('hex')
+              .slice(0, 8);
+
             const swContent = fs.readFileSync(swPath, 'utf-8');
-            const updatedSw = swContent.replace(
-              '/* __VITE_PRECACHE_ASSETS__ */',
-              compiledAssets,
-            );
+            const updatedSw = swContent
+              .replace(
+                "const CACHE_NAME = 'madarao-pwa-2027-v4';",
+                `const CACHE_NAME = 'madarao-pwa-2027-${buildHash}';`,
+              )
+              .replace('/* __VITE_PRECACHE_ASSETS__ */', compiledAssets);
             fs.writeFileSync(swPath, updatedSw, 'utf-8');
           }
         },
