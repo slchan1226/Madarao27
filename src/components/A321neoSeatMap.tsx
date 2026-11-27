@@ -17,7 +17,7 @@ interface A321neoSeatMapProps {
 }
 
 const LEFT_LETTERS = ['A', 'B', 'C'] as const;
-const RIGHT_LETTERS = ['D', 'E', 'F'] as const;
+const FAR_RIGHT_LETTERS = ['E', 'F'] as const;
 
 function getSeatTileClasses(
   seat: OutboundSeatAssignment,
@@ -75,165 +75,169 @@ export const A321neoSeatMap: React.FC<A321neoSeatMapProps> = ({
     onSelectSeat(mySeat === seatCode ? null : seatCode);
   };
 
-  const renderCabinGrid = (expanded: boolean) => (
-    <div className="relative rounded-[26px] border-2 border-slate-300/90 bg-gradient-to-b from-sky-50/55 via-white to-slate-50/75 px-2.5 sm:px-4 py-3.5 shadow-inner">
-      {/* 左右機身舷窗視覺刻度 */}
-      <div
-        className="pointer-events-none absolute left-1 top-14 bottom-5 flex flex-col justify-around"
-        aria-hidden="true"
+  const renderActiveSeatCell = (code: string) => {
+    const seat = OUTBOUND_SEAT_BY_CODE[code];
+
+    if (!seat) {
+      return (
+        <div
+          key={code}
+          className="min-h-[64px] rounded-xl border border-dashed border-slate-300/90 bg-slate-100/65 px-1 py-2 flex flex-col items-center justify-center text-center"
+          aria-label={`${code} 未列於此兩張訂單`}
+        >
+          <span className="text-[10px] font-bold text-slate-400 tabular-nums">
+            {code}
+          </span>
+          <span className="text-[9px] text-slate-400 leading-tight mt-0.5">
+            空／他客
+          </span>
+        </div>
+      );
+    }
+
+    const isMine = mySeat === seat.code;
+    const tone = getSeatTileClasses(seat, isMine);
+
+    return (
+      <button
+        key={seat.code}
+        type="button"
+        onClick={() => handleToggleSeat(seat.code)}
+        aria-pressed={isMine}
+        aria-label={`${seat.code} ${seat.passengerName}，訂單 ${seat.bookingRef}，點擊${isMine ? '取消' : '標記'}我的座位`}
+        className={`min-h-[64px] rounded-xl border px-1.5 py-1.5 text-left flex flex-col justify-between transition active:scale-[0.97] cursor-pointer ${tone.button}`}
       >
-        {OUTBOUND_SEAT_ROWS.map((r) => (
+        <div className="flex items-center justify-between gap-0.5 w-full">
           <span
-            key={`wl-${r}`}
-            className="w-1 h-4 rounded-full bg-sky-300/80"
-          />
-        ))}
-      </div>
-      <div
-        className="pointer-events-none absolute right-1 top-14 bottom-5 flex flex-col justify-around"
-        aria-hidden="true"
-      >
-        {OUTBOUND_SEAT_ROWS.map((r) => (
-          <span
-            key={`wr-${r}`}
-            className="w-1 h-4 rounded-full bg-slate-300/75"
-          />
-        ))}
-      </div>
-
-      {/* 前門出口與機頭方向標示 */}
-      <div className="flex items-center justify-between gap-2 text-[10px] font-bold text-slate-500 pb-2 mb-2 border-b border-dashed border-slate-200">
-        <span className="text-rose-700/85">◄ 前門 EXIT</span>
-        <span className="inline-flex items-center gap-1 text-snow-900">
-          <Plane className="w-3 h-3 -rotate-45 text-sky-700" aria-hidden="true" />
-          <span>機頭方向 · Upfront 前段（第 4–7 排）</span>
-        </span>
-        <span className="text-rose-700/85">EXIT ►</span>
-      </div>
-
-      {/* 欄位字母標頭（左側 A-B-C 寬格清楚顯示全名；右側 D-E-F 精簡作走道對照） */}
-      <div
-        className={`grid items-center gap-1 sm:gap-1.5 text-[10px] font-bold text-slate-500 text-center mb-1.5 ${
-          expanded
-            ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_28px_36px_36px_36px]'
-            : 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_22px_20px_20px_20px] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_28px_36px_36px_36px]'
-        }`}
-      >
-        <span className="text-sky-800">A 窗</span>
-        <span className="text-sky-800">B 中</span>
-        <span className="text-sky-800">C 廊</span>
-        <span className="text-[9px] text-slate-400">走道</span>
-        <span className="text-slate-400">D</span>
-        <span className="text-slate-400">E</span>
-        <span className="text-slate-400">F</span>
-      </div>
-
-      {/* 第 4–7 排座位行 */}
-      <div className="space-y-1.5 relative">
-        {OUTBOUND_SEAT_ROWS.map((row) => (
-          <div
-            key={row}
-            className={`grid items-stretch gap-1 sm:gap-1.5 ${
-              expanded
-                ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_28px_36px_36px_36px]'
-                : 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_22px_20px_20px_20px] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_28px_36px_36px_36px]'
-            }`}
+            className={`text-[11px] font-extrabold tabular-nums leading-none ${tone.codeText}`}
           >
-            {LEFT_LETTERS.map((letter) => {
-              const code = `${row}${letter}`;
-              const seat = OUTBOUND_SEAT_BY_CODE[code];
+            {seat.code}
+          </span>
+          {isMine ? (
+            <span className="w-4 h-4 rounded-full bg-amber-500 text-white inline-flex items-center justify-center shrink-0">
+              <Check className="w-2.5 h-2.5" aria-hidden="true" />
+            </span>
+          ) : (
+            <span
+              className={`text-[9px] font-bold leading-none ${tone.metaText}`}
+            >
+              {seat.initials}
+            </span>
+          )}
+        </div>
+        <div
+          className={`text-[10.5px] sm:text-xs font-bold leading-tight mt-1 break-words ${tone.nameText}`}
+        >
+          {seat.passengerName}
+        </div>
+      </button>
+    );
+  };
 
-              if (!seat) {
-                return (
-                  <div
-                    key={code}
-                    className="min-h-[64px] rounded-xl border border-dashed border-slate-300 bg-slate-100/70 px-1.5 py-2 flex flex-col items-center justify-center text-center"
-                    aria-label={`${code} 未列於此兩張訂單`}
-                  >
-                    <span className="text-[11px] font-bold text-slate-500 tabular-nums">
-                      {code}
-                    </span>
-                    <span className="text-[10px] text-slate-400 leading-tight mt-0.5">
-                      其他／空位
-                    </span>
-                  </div>
-                );
-              }
+  const renderCabinGrid = (expanded: boolean) => {
+    const gridColsClass = expanded
+      ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_24px_minmax(0,1fr)_28px_28px]'
+      : 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_18px_minmax(0,1fr)_12px_12px] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_26px_minmax(0,1fr)_28px_28px]';
 
-              const isMine = mySeat === seat.code;
-              const tone = getSeatTileClasses(seat, isMine);
+    return (
+      <div className="relative rounded-[26px] border-2 border-slate-300/90 bg-gradient-to-b from-sky-50/55 via-white to-slate-50/75 px-2 sm:px-4 py-3.5 shadow-inner">
+        {/* 左右機身舷窗視覺刻度 */}
+        <div
+          className="pointer-events-none absolute left-1 top-14 bottom-5 flex flex-col justify-around"
+          aria-hidden="true"
+        >
+          {OUTBOUND_SEAT_ROWS.map((r) => (
+            <span
+              key={`wl-${r}`}
+              className="w-1 h-4 rounded-full bg-sky-300/80"
+            />
+          ))}
+        </div>
+        <div
+          className="pointer-events-none absolute right-1 top-14 bottom-5 flex flex-col justify-around"
+          aria-hidden="true"
+        >
+          {OUTBOUND_SEAT_ROWS.map((r) => (
+            <span
+              key={`wr-${r}`}
+              className="w-1 h-4 rounded-full bg-slate-300/75"
+            />
+          ))}
+        </div>
 
-              return (
-                <button
-                  key={seat.code}
-                  type="button"
-                  onClick={() => handleToggleSeat(seat.code)}
-                  aria-pressed={isMine}
-                  aria-label={`${seat.code} ${seat.passengerName}，訂單 ${seat.bookingRef}，點擊${isMine ? '取消' : '標記'}我的座位`}
-                  className={`min-h-[64px] rounded-xl border px-1.5 py-1.5 text-left flex flex-col justify-between transition active:scale-[0.97] cursor-pointer ${tone.button}`}
-                >
-                  <div className="flex items-center justify-between gap-1 w-full">
-                    <span
-                      className={`text-[11px] font-extrabold tabular-nums leading-none ${tone.codeText}`}
-                    >
-                      {seat.code}
-                    </span>
-                    {isMine ? (
-                      <span className="w-4 h-4 rounded-full bg-amber-500 text-white inline-flex items-center justify-center shrink-0">
-                        <Check className="w-2.5 h-2.5" aria-hidden="true" />
-                      </span>
-                    ) : (
-                      <span
-                        className={`text-[9px] font-bold leading-none ${tone.metaText}`}
-                      >
-                        {seat.initials}
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className={`text-[11px] sm:text-xs font-bold leading-tight mt-1 break-words ${tone.nameText}`}
-                  >
-                    {seat.passengerName}
-                  </div>
-                </button>
-              );
-            })}
+        {/* 前門出口與機頭方向標示 */}
+        <div className="flex items-center justify-between gap-2 text-[10px] font-bold text-slate-500 pb-2 mb-2 border-b border-dashed border-slate-200">
+          <span className="text-rose-700/85">◄ 前門 EXIT</span>
+          <span className="inline-flex items-center gap-1 text-snow-900">
+            <Plane className="w-3 h-3 -rotate-45 text-sky-700" aria-hidden="true" />
+            <span>機頭方向 · Upfront 前段（第 4–7 排）</span>
+          </span>
+          <span className="text-rose-700/85">EXIT ►</span>
+        </div>
 
-            {/* 中央走道排數標記 */}
-            <div className="flex flex-col items-center justify-center relative">
-              <div
-                className="absolute inset-y-0 left-1/2 -translate-x-1/2 border-l border-dashed border-slate-300/80 pointer-events-none"
-                aria-hidden="true"
-              />
-              <span className="relative z-10 bg-white/95 border border-slate-200/90 text-slate-600 text-[10px] font-bold w-5 h-5 rounded-full inline-flex items-center justify-center tabular-nums">
-                {row}
-              </span>
-            </div>
+        {/* 欄位字母標頭（A-B-C 及右側走廊 D 寬格顯示全名；E-F 精簡作走道對照） */}
+        <div
+          className={`grid items-center gap-1 sm:gap-1.5 text-[10px] font-bold text-slate-500 text-center mb-1.5 ${gridColsClass}`}
+        >
+          <span className="text-sky-800">A 窗</span>
+          <span className="text-sky-800">B 中</span>
+          <span className="text-sky-800">C 廊</span>
+          <span className="text-[9px] text-slate-400">道</span>
+          <span className="text-sky-800">D 廊</span>
+          <span className="text-slate-400">E</span>
+          <span className="text-slate-400">F</span>
+        </div>
 
-            {/* 右側 D-E-F 參考座椅輪廓（保持 Airbus A321neo 3-3 空間方位感） */}
-            {RIGHT_LETTERS.map((letter) => (
-              <div
-                key={`${row}${letter}`}
-                aria-hidden="true"
-                className="rounded-lg border border-slate-200/80 bg-slate-100/55 flex items-center justify-center text-[9px] font-medium text-slate-400 tabular-nums"
-              >
-                <span className={expanded ? 'inline' : 'hidden sm:inline'}>
+        {/* 第 4–7 排座位行 */}
+        <div className="space-y-1.5 relative">
+          {OUTBOUND_SEAT_ROWS.map((row) => (
+            <div
+              key={row}
+              className={`grid items-stretch gap-1 sm:gap-1.5 ${gridColsClass}`}
+            >
+              {LEFT_LETTERS.map((letter) =>
+                renderActiveSeatCell(`${row}${letter}`),
+              )}
+
+              {/* 中央走道排數標記 */}
+              <div className="flex flex-col items-center justify-center relative">
+                <div
+                  className="absolute inset-y-0 left-1/2 -translate-x-1/2 border-l border-dashed border-slate-300/80 pointer-events-none"
+                  aria-hidden="true"
+                />
+                <span className="relative z-10 bg-white/95 border border-slate-200/90 text-slate-600 text-[10px] font-bold w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full inline-flex items-center justify-center tabular-nums">
                   {row}
-                  {letter}
                 </span>
               </div>
-            ))}
-          </div>
-        ))}
-      </div>
 
-      {/* 底部方向提示 */}
-      <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
-        <span>點選自己個位即可儲存並同步至首頁航班卡</span>
-        <span>機尾方向 ▼</span>
+              {/* 右側走廊 D 欄（5D 為 Hok Man Fung） */}
+              {renderActiveSeatCell(`${row}D`)}
+
+              {/* 右側 E-F 參考座椅輪廓（保持 Airbus A321neo 3-3 空間方位感） */}
+              {FAR_RIGHT_LETTERS.map((letter) => (
+                <div
+                  key={`${row}${letter}`}
+                  aria-hidden="true"
+                  className="rounded-lg border border-slate-200/80 bg-slate-100/55 flex items-center justify-center text-[9px] font-medium text-slate-400 tabular-nums"
+                >
+                  <span className={expanded ? 'inline' : 'hidden sm:inline'}>
+                    {row}
+                    {letter}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* 底部方向提示 */}
+        <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
+          <span>點選自己個位即可儲存並同步至首頁航班卡</span>
+          <span>機尾方向 ▼</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-3">
@@ -252,10 +256,14 @@ export const A321neoSeatMap: React.FC<A321neoSeatMapProps> = ({
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover object-top mix-blend-multiply scale-[1.55] origin-top transition-transform duration-200 group-hover:scale-[1.62]"
           />
-          {/* 左側前段（第 4–7 排 A-C）位置高亮標記 */}
+          {/* 左側前段（第 4–7 排 A-C）與右側 5D 位置高亮標記 */}
           <span
             aria-hidden="true"
             className="absolute left-[26%] top-[53%] w-[21%] h-[28%] rounded-sm bg-sky-600/35 border border-sky-700/80 shadow-2xs"
+          />
+          <span
+            aria-hidden="true"
+            className="absolute left-[53%] top-[60%] w-[9%] h-[8%] rounded-[2px] bg-sky-600/45 border border-sky-700/85 shadow-2xs"
           />
           <span
             aria-hidden="true"
@@ -272,7 +280,7 @@ export const A321neoSeatMap: React.FC<A321neoSeatMapProps> = ({
                 Airbus A321neo 去程機艙座位圖
               </h3>
               <p className="text-[11px] text-slate-600 leading-snug mt-0.5">
-                11 位團友集中坐前段左側（第 4–7 排 A–C 區）
+                11 位團友集中坐前段（第 4–7 排 A–C 及 5D 走廊位）
               </p>
             </div>
             <button
@@ -370,13 +378,17 @@ export const A321neoSeatMap: React.FC<A321neoSeatMapProps> = ({
                     aria-hidden="true"
                     className="absolute left-[34%] top-[39%] w-[14%] h-[22%] rounded-xs bg-sky-600/35 border border-sky-700/80"
                   />
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-[52%] top-[44%] w-[6%] h-[6%] rounded-[2px] bg-sky-600/45 border border-sky-700/85"
+                  />
                 </div>
                 <div className="min-w-0 text-xs text-slate-700 space-y-1">
                   <p className="font-bold text-snow-900">
-                    全體 11 人坐於前段左側 Upfront 區
+                    全體 11 人坐於前段 Upfront 區（4–7 排）
                   </p>
                   <p className="text-[11px] text-slate-600 leading-relaxed">
-                    登機後通過前門往後數第 4–7 排左手邊（A 窗邊、B 中間、C 走廊），落機領取雪具更快。
+                    登機後通過前門往後數第 4–7 排（左側 A–C 及右側走廊位 5D），落機領取雪具更快。
                   </p>
                 </div>
               </div>

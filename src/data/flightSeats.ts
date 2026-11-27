@@ -17,7 +17,7 @@ export interface BookingGroupInfo {
 export interface OutboundSeatAssignment {
   code: string;
   row: 4 | 5 | 6 | 7;
-  letter: 'A' | 'B' | 'C';
+  letter: SeatLetter;
   passengerName: string;
   initials: string;
   bookingRef: BookingRefId;
@@ -35,7 +35,7 @@ export const BOOKING_GROUPS: Record<BookingRefId, BookingGroupInfo> = {
     checkedKgPerPax: 30,
     totalCheckedKg: 240,
     oversizedCount: 2,
-    seatZoneLabel: '第 4–6 排 Upfront',
+    seatZoneLabel: '第 4–6 排（含 5D）',
   },
   VLNWFF: {
     ref: 'VLNWFF',
@@ -44,7 +44,7 @@ export const BOOKING_GROUPS: Record<BookingRefId, BookingGroupInfo> = {
     checkedKgPerPax: 25,
     totalCheckedKg: 75,
     oversizedCount: 1,
-    seatZoneLabel: '第 7 排 Upfront',
+    seatZoneLabel: '第 7 排 A–C',
   },
 };
 
@@ -83,7 +83,7 @@ export const OUTBOUND_SEATS: OutboundSeatAssignment[] = [
     seatTypeLabel: 'Upfront 前排',
     position: '走廊',
   },
-  // Row 5 - TUKQQH
+  // Row 5 - TUKQQH（含右側走廊位 5D）
   {
     code: '5A',
     row: 5,
@@ -114,17 +114,17 @@ export const OUTBOUND_SEATS: OutboundSeatAssignment[] = [
     seatTypeLabel: 'Upfront 前排',
     position: '走廊',
   },
-  // Row 6 - TUKQQH (6A 未列於此兩張訂單)
   {
-    code: '6B',
-    row: 6,
-    letter: 'B',
+    code: '5D',
+    row: 5,
+    letter: 'D',
     passengerName: 'Hok Man Fung',
     initials: 'HF',
     bookingRef: 'TUKQQH',
     seatTypeLabel: 'Upfront 前排',
-    position: '中間',
+    position: '走廊',
   },
+  // Row 6 - TUKQQH（6A、6B 未列於此兩張訂單）
   {
     code: '6C',
     row: 6,
@@ -132,7 +132,7 @@ export const OUTBOUND_SEATS: OutboundSeatAssignment[] = [
     passengerName: 'Tai Wai Poon',
     initials: 'TP',
     bookingRef: 'TUKQQH',
-    seatTypeLabel: '標準／前段位',
+    seatTypeLabel: '標準位',
     position: '走廊',
   },
   // Row 7 - VLNWFF
@@ -184,6 +184,10 @@ export function getOutboundSeat(
 export function readStoredSeat(): string | null {
   try {
     const saved = localStorage.getItem(MY_SEAT_STORAGE_KEY);
+    if (saved === '6B') {
+      localStorage.setItem(MY_SEAT_STORAGE_KEY, '5D');
+      return '5D';
+    }
     if (saved && OUTBOUND_SEAT_BY_CODE[saved]) {
       return saved;
     }
