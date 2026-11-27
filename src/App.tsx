@@ -33,6 +33,12 @@ import {OfflineBanner} from './components/OfflineBanner';
 import {RouteTab} from './components/RouteTab';
 import {SkiMapTab} from './components/SkiMapTab';
 import {WeatherTab} from './components/WeatherTab';
+import {
+  BOOKING_GROUPS,
+  getOutboundSeat,
+  readStoredSeat,
+  saveStoredSeat,
+} from './data/flightSeats';
 import {useOnlineStatus} from './hooks/useOnlineStatus';
 import {usePWAInstall} from './hooks/usePWAInstall';
 import {useSkiWeather} from './hooks/useSkiWeather';
@@ -128,6 +134,7 @@ export default function App() {
   const [isFlightBackupView, setIsFlightBackupView] = useState<boolean>(false);
   const [myCar, setMyCar] = useState<CarId | null>(readInitialCar);
   const [myRoom, setMyRoom] = useState<string | null>(readInitialRoom);
+  const [mySeat, setMySeat] = useState<string | null>(readStoredSeat);
 
   const [cardMapModes, setCardMapModes] = useState<Record<ResortKey, MapMode>>({
     madarao: 'svg',
@@ -307,6 +314,25 @@ export default function App() {
     }
     showToast('已取消房間置頂');
   }, [showToast]);
+
+  const handleSelectSeat = useCallback(
+    (seatCode: string | null) => {
+      setMySeat(seatCode);
+      saveStoredSeat(seatCode);
+      if (!seatCode) {
+        showToast('已取消去程座位標記');
+        return;
+      }
+      const seat = getOutboundSeat(seatCode);
+      if (seat) {
+        const booking = BOOKING_GROUPS[seat.bookingRef];
+        showToast(
+          `已記住座位：${seat.code} ${seat.passengerName}（${booking.ref} · ${booking.checkedKgPerPax}kg）`,
+        );
+      }
+    },
+    [showToast],
+  );
 
   const handleCopyText = useCallback(
     async (text: string) => {
@@ -660,6 +686,7 @@ export default function App() {
               isWeatherLoading={skiWeather.isLoading}
               myCar={myCar}
               myRoom={myRoom}
+              mySeat={mySeat}
               showFlightTab={timeline.showFlightTab}
               showHomeOutboundCard={timeline.showHomeOutboundCard}
               showHomeInboundCard={timeline.showHomeInboundCard}
@@ -670,6 +697,10 @@ export default function App() {
           {activeTab === 'flight' && (
             <FlightTab
               isBackupMode={!timeline.showFlightTab}
+              defaultLeg={timeline.showHomeInboundCard ? 'inbound' : 'outbound'}
+              mySeat={mySeat}
+              onSelectSeat={handleSelectSeat}
+              onCopyText={handleCopyText}
               onBackHome={() => switchTab('home')}
               onNavigateTab={switchTab}
             />

@@ -29,6 +29,7 @@ import {
   type OpenMeteoMultiModelResponse,
   type WeatherIconKind,
 } from '../lib/weather';
+import {BOOKING_GROUPS, getOutboundSeat} from '../data/flightSeats';
 import type {CarId, TabId} from '../types/trip';
 
 interface HomeTabProps {
@@ -38,6 +39,7 @@ interface HomeTabProps {
   isWeatherLoading: boolean;
   myCar: CarId | null;
   myRoom: string | null;
+  mySeat: string | null;
   showFlightTab: boolean;
   showHomeOutboundCard: boolean;
   showHomeInboundCard: boolean;
@@ -114,6 +116,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   isWeatherLoading,
   myCar,
   myRoom,
+  mySeat,
   showFlightTab,
   showHomeOutboundCard,
   showHomeInboundCard,
@@ -230,7 +233,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {
             id: 'flight' as TabId,
             title: '航班資訊',
-            subtitle: 'GK28 / GK27 · 行李與 VJW',
+            subtitle: 'GK28/27 · A321neo 座位與行李',
             icon: (
               <PlaneTakeoff
                 className="w-4 h-4 text-sky-700"
@@ -531,8 +534,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               </div>
             </div>
           </div>
-          <div className="pt-2 border-t border-sky-200/60 flex items-center justify-between text-[11px] text-sky-800 font-semibold">
-            <span>點擊查看 315kg 寄艙行李配額與 Visit Japan Web</span>
+          <div className="pt-2 border-t border-sky-200/60 flex items-center justify-between gap-2 text-[11px] text-sky-900 font-semibold">
+            {(() => {
+              const claimed = getOutboundSeat(mySeat);
+              const booking = claimed
+                ? BOOKING_GROUPS[claimed.bookingRef]
+                : null;
+              if (claimed && booking) {
+                return (
+                  <span className="leading-snug tabular-nums">
+                    我的座位：<strong>{claimed.code}（{claimed.position}）</strong>{' '}
+                    · {claimed.passengerName} ｜ {booking.ref} ·{' '}
+                    {booking.checkedKgPerPax}kg
+                  </span>
+                );
+              }
+              return (
+                <span className="leading-snug">
+                  點擊查看 A321neo 第 4–7 排座位圖、寄艙配額與 Visit Japan Web
+                </span>
+              );
+            })()}
             <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           </div>
         </button>
